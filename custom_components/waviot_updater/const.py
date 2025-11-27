@@ -2,4 +2,4 @@ DOMAIN = "waviot_updater"
 CONF_API_KEY = "api_key"
 CONF_MODEM_ID = "modem_id"
 UPDATE_INTERVAL = 1200  # 20 minutes
-BASE_URL = "https://lk.curog.ru/api."
+BASE_URL = "https://lk.waviot.ru/api."
