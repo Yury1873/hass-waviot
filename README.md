@@ -127,12 +127,12 @@ using your **API key** and **modem ID**.
 - You can reconfigure at any time by removing and re-adding the integration.
 ---
 ## 🧑‍💻 Developer
-**Author:** [soulripper13](https://github.com/soulripper13)
+**Author:** [Yury1873](https://github.com/Yury1873)
 **License:** [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 **Repository:** [hass-waviot](https://github.com/soulripper13/hass-waviot)
 ---
 ## 🩵 Support
-If you find this integration helpful, please ⭐️ the repo or [open an issue](https://github.com/soulripper13/hass-waviot/issues) for suggestions and bug reports.
+If you find this integration helpful, please ⭐️ the repo or [open an issue](https://github.com/Yury1873/hass-waviot/issues) for suggestions and bug reports.
 
 ---
 
