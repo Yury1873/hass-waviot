@@ -2,7 +2,7 @@
 ![HACS Badge](https://img.shields.io/badge/HACS-Custom-41BDF5.svg)
 ![Version](https://img.shields.io/badge/version-1.0.0-blue.svg)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-Пользовательская интеграция для Home Assistant для мониторинга **энергомеров WAVIoT** через официальный API [curog.ru](https://lk.curog.ru).
+Пользовательская интеграция для Home Assistant для мониторинга **энергомеров WAVIoT** через официальный API [waviot.ru](https://lk.waviot.ru).
 Она предоставляет сенсоры использования электричества, уровня батареи и температуры — с полной конфигурацией через UI.
 ---
 ## ✨ Возможности
