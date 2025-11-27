@@ -1,11 +1,11 @@
 {
-  "domain": "waviot_updater",
-  "name": "Waviot Curog.ru",
-  "codeowners": ["@soulripper13"],
+  "domain": "waviot_getter",
+  "name": "Waviot WAVIoT.ru",
+  "codeowners": ["@Yury1873"],
   "config_flow": true,
-  "documentation": "https://github.com/soulripper13/hass-waviot",
+  "documentation": "https://github.com/Yury1873/hass-waviot",
   "iot_class": "cloud_polling",
-  "issue_tracker": "https://github.com/soulripper13/hass-waviot/issues",
+  "issue_tracker": "https://github.com/Yury1873/hass-waviot/issues",
   "requirements": ["aiohttp"],
   "version": "1.0.0"
 }
