@@ -111,7 +111,7 @@ After installing and restarting:
 ---
 ## 🔄 Data Source
 All data is fetched from:
-https://lk.curog.ru/api.data/get_modem_channel_values/
+https://lk.waviot.ru/api.data/get_modem_channel_values/
 using your **API key** and **modem ID**.
 ---
 ## 🧪 Example Output
