@@ -17,7 +17,7 @@
 ### Метод 1: HACS (Рекомендуется)
 Предпочтительный способ — использовать HACS:
 1. Найдите и загрузите эту интеграцию в вашу установку HA через HACS, или нажмите:  
-   [![Открыть репозиторий HACS][hacs-repo-badge]](https://my.home-assistant.io/redirect/hacs_repository/?owner=soulripper13&repository=hass-waviot&category=integration)
+   [![Открыть репозиторий HACS][hacs-repo-badge]](https://my.home-assistant.io/redirect/hacs_repository/?owner=Yury1873&repository=hass-waviot&category=integration)
 2. Перезапустите Home Assistant
 3. Добавьте эту интеграцию в Home Assistant, или нажмите:  
    [![Добавить интеграцию][config-flow-badge]](https://my.home-assistant.io/redirect/config_flow_start?domain=waviot_updater)
