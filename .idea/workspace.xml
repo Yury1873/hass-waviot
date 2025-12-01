@@ -7,7 +7,6 @@
     <list default="true" id="79b4b04e-1bda-4d14-af19-3bc64d834760" name="Changes" comment="Update README.md">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/custom_components/waviot_updater/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/custom_components/waviot_updater/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/custom_components/waviot_updater/coordinator.py" beforeDir="false" afterPath="$PROJECT_DIR$/custom_components/waviot_updater/coordinator.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/hacs.json" beforeDir="false" afterPath="$PROJECT_DIR$/hacs.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -138,7 +137,15 @@
       <option name="project" value="LOCAL" />
       <updated>1764315604641</updated>
     </task>
-    <option name="localTasksCounter" value="9" />
+    <task id="LOCAL-00009" summary="Update README.md">
+      <option name="closed" value="true" />
+      <created>1764596271563</created>
+      <option name="number" value="00009" />
+      <option name="presentableId" value="LOCAL-00009" />
+      <option name="project" value="LOCAL" />
+      <updated>1764596271563</updated>
+    </task>
+    <option name="localTasksCounter" value="10" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">

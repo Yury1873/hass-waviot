@@ -1,4 +1,5 @@
 import logging
+from typing import Final, override
 
 from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
