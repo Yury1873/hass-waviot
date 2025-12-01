@@ -5,7 +5,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="79b4b04e-1bda-4d14-af19-3bc64d834760" name="Changes" comment="Update README.md">
-      <change beforePath="$PROJECT_DIR$/custom_components/waviot_updater/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/custom_components/waviot_updater/manifest.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/custom_components/waviot_updater/config_flow.py" beforeDir="false" afterPath="$PROJECT_DIR$/custom_components/waviot_updater/config_flow.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -30,12 +31,12 @@
     &quot;state&quot;: &quot;OPEN&quot;
   }
 }</component>
-  <component name="GithubPullRequestsUISettings">{
-  &quot;selectedUrlAndAccountId&quot;: {
-    &quot;url&quot;: &quot;https://github.com/Yury1873/hass-waviot.git&quot;,
-    &quot;accountId&quot;: &quot;154f4e98-41e8-4d4d-9ec9-db2dd5ca9121&quot;
+  <component name="GithubPullRequestsUISettings"><![CDATA[{
+  "selectedUrlAndAccountId": {
+    "url": "https://github.com/Yury1873/hass-waviot.git",
+    "accountId": "c275a9a1-26d3-4b36-bcdc-c13f11048355"
   }
-}</component>
+}]]></component>
   <component name="ProjectColorInfo">{
   &quot;associatedIndex&quot;: 8
 }</component>
@@ -151,7 +152,23 @@
       <option name="project" value="LOCAL" />
       <updated>1764596693337</updated>
     </task>
-    <option name="localTasksCounter" value="11" />
+    <task id="LOCAL-00011" summary="Update README.md">
+      <option name="closed" value="true" />
+      <created>1764596802539</created>
+      <option name="number" value="00011" />
+      <option name="presentableId" value="LOCAL-00011" />
+      <option name="project" value="LOCAL" />
+      <updated>1764596802539</updated>
+    </task>
+    <task id="LOCAL-00012" summary="Update README.md">
+      <option name="closed" value="true" />
+      <created>1764596986430</created>
+      <option name="number" value="00012" />
+      <option name="presentableId" value="LOCAL-00012" />
+      <option name="project" value="LOCAL" />
+      <updated>1764596986430</updated>
+    </task>
+    <option name="localTasksCounter" value="13" />
     <servers />
   </component>
   <component name="Vcs.Log.Tabs.Properties">
