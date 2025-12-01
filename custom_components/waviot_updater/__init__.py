@@ -1,9 +1,10 @@
 import logging
-from typing import Final, override
+from typing import Final
 
-from homeassistant.core import HomeAssistant
 from homeassistant.config_entries import ConfigEntry
-#from .const import DOMAIN, CONF_API_KEY, CONF_MODEM_ID
+from homeassistant.core import HomeAssistant
+
+# from .const import DOMAIN, CONF_API_KEY, CONF_MODEM_ID
 from . import const
 from .coordinator import WaviotDataUpdateCoordinator
 
