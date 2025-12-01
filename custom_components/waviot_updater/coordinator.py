@@ -3,7 +3,9 @@ import aiohttp
 from datetime import datetime, timedelta, timezone
 import logging
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from .const import UPDATE_INTERVAL, BASE_URL
+#from .const import UPDATE_INTERVAL, BASE_URL
+from . import const
+
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -19,7 +21,7 @@ class WaviotDataUpdateCoordinator(DataUpdateCoordinator):
             hass,
             _LOGGER,
             name=f"WAVIoT Modem {modem_id}",
-            update_interval=timedelta(seconds=UPDATE_INTERVAL),
+            update_interval=timedelta(seconds=const.UPDATE_INTERVAL),
         )
 
     async def _async_update_data(self):
@@ -30,7 +32,7 @@ class WaviotDataUpdateCoordinator(DataUpdateCoordinator):
         async with aiohttp.ClientSession() as session:
             # --- Modem info ---
             try:
-                url = f"{BASE_URL}modem/info/?id={self.modem_id.lower()}&key={self.api_key}"
+                url = f"{const.BASE_URL}modem/info/?id={self.modem_id.lower()}&key={self.api_key}"
                 _LOGGER.debug("Fetching modem info: %s", url)
                 async with session.get(url) as resp:
                     info = await resp.json()
@@ -57,7 +59,7 @@ class WaviotDataUpdateCoordinator(DataUpdateCoordinator):
                 three_months_ago = now - timedelta(days=90)  # only last 3 months
 
                 url = (
-                    f"{BASE_URL}data/get_modem_channel_values/"
+                    f"{const.BASE_URL}data/get_modem_channel_values/"
                     f"?modem_id={self.modem_id}&channel={channel_id}&key={self.api_key}"
                     f"&from={int(three_months_ago.timestamp())}&to={int(now.timestamp())}"
                 )
