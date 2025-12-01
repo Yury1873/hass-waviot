@@ -1,0 +1,96 @@
+Index: custom_components/waviot_updater/config_flow.py
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+>from homeassistant import config_entries\nfrom .const import DOMAIN, CONF_API_KEY, CONF_MODEM_ID\nimport voluptuous as vol\n\nclass WaviotFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):\n    VERSION = 1\n\n    async def async_step_user(self, user_input=None):\n        if user_input is not None:\n            return self.async_create_entry(title=f\"Modem {user_input[CONF_MODEM_ID]}\", data=user_input)\n\n        schema = vol.Schema({\n            vol.Required(CONF_API_KEY): str,\n            vol.Required(CONF_MODEM_ID): str,\n        })\n        return self.async_show_form(step_id=\"user\", data_schema=schema)\n
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/custom_components/waviot_updater/config_flow.py b/custom_components/waviot_updater/config_flow.py
+--- a/custom_components/waviot_updater/config_flow.py	(revision 8ead579efcda4aed20ac7be75f110c7c6a107e63)
++++ b/custom_components/waviot_updater/config_flow.py	(date 1764597636273)
+@@ -1,16 +1,16 @@
+ from homeassistant import config_entries
+-from .const import DOMAIN, CONF_API_KEY, CONF_MODEM_ID
++from . import const
+ import voluptuous as vol
+ 
+-class WaviotFlowHandler(config_entries.ConfigFlow, domain=DOMAIN):
++class WaviotFlowHandler(config_entries.ConfigFlow, domain=  const.DOMAIN):
+     VERSION = 1
+ 
+     async def async_step_user(self, user_input=None):
+         if user_input is not None:
+-            return self.async_create_entry(title=f"Modem {user_input[CONF_MODEM_ID]}", data=user_input)
++            return self.async_create_entry(title=f"Modem {user_input[const.CONF_MODEM_ID]}", data=user_input)
+ 
+         schema = vol.Schema({
+-            vol.Required(CONF_API_KEY): str,
+-            vol.Required(CONF_MODEM_ID): str,
++            vol.Required(const.CONF_API_KEY): str,
++            vol.Required(const.CONF_MODEM_ID): str,
+         })
+         return self.async_show_form(step_id="user", data_schema=schema)
+Index: .idea/workspace.xml
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.BaseRevisionTextPatchEP
+<+><?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<project version=\"4\">\n  <component name=\"AutoImportSettings\">\n    <option name=\"autoReloadType\" value=\"SELECTIVE\" />\n  </component>\n  <component name=\"ChangeListManager\">\n    <list default=\"true\" id=\"79b4b04e-1bda-4d14-af19-3bc64d834760\" name=\"Changes\" comment=\"Update README.md\">\n      <change beforePath=\"$PROJECT_DIR$/custom_components/waviot_updater/manifest.json\" beforeDir=\"false\" afterPath=\"$PROJECT_DIR$/custom_components/waviot_updater/manifest.json\" afterDir=\"false\" />\n    </list>\n    <option name=\"SHOW_DIALOG\" value=\"false\" />\n    <option name=\"HIGHLIGHT_CONFLICTS\" value=\"true\" />\n    <option name=\"HIGHLIGHT_NON_ACTIVE_CHANGELIST\" value=\"false\" />\n    <option name=\"LAST_RESOLUTION\" value=\"IGNORE\" />\n  </component>\n  <component name=\"Git.Settings\">\n    <option name=\"PREVIOUS_COMMIT_AUTHORS\">\n      <list>\n        <option value=\"Yury1873 &lt;150341242+yury1873@users.noreply.github.com&gt;\" />\n      </list>\n    </option>\n    <option name=\"RECENT_GIT_ROOT_PATH\" value=\"$PROJECT_DIR$\" />\n  </component>\n  <component name=\"GitHubPullRequestSearchHistory\">{\n  &quot;history&quot;: [\n    {\n      &quot;state&quot;: &quot;OPEN&quot;\n    }\n  ],\n  &quot;lastFilter&quot;: {\n    &quot;state&quot;: &quot;OPEN&quot;\n  }\n}</component>\n  <component name=\"GithubPullRequestsUISettings\">{\n  &quot;selectedUrlAndAccountId&quot;: {\n    &quot;url&quot;: &quot;https://github.com/Yury1873/hass-waviot.git&quot;,\n    &quot;accountId&quot;: &quot;154f4e98-41e8-4d4d-9ec9-db2dd5ca9121&quot;\n  }\n}</component>\n  <component name=\"ProjectColorInfo\">{\n  &quot;associatedIndex&quot;: 8\n}</component>\n  <component name=\"ProjectId\" id=\"363mFD7FxBvDa5XKyv1Y7ONw1IP\" />\n  <component name=\"ProjectViewState\">\n    <option name=\"hideEmptyMiddlePackages\" value=\"true\" />\n    <option name=\"showLibraryContents\" value=\"true\" />\n  </component>\n  <component name=\"PropertiesComponent\"><![CDATA[{\n  \"keyToString\": {\n    \"ModuleVcsDetector.initialDetectionPerformed\": \"true\",\n    \"Python.const.executor\": \"Run\",\n    \"RunOnceActivity.ShowReadmeOnStart\": \"true\",\n    \"RunOnceActivity.git.unshallow\": \"true\",\n    \"git-widget-placeholder\": \"main\",\n    \"last_opened_file_path\": \"/media/yk/WorkDisk/_my_projects/Python/waviot\",\n    \"settings.editor.selected.configurable\": \"project.propVCSSupport.DirectoryMappings\",\n    \"settings.editor.splitter.proportion\": \"0.29022405\"\n  }\n}]]></component>\n  <component name=\"SharedIndexes\">\n    <attachedChunks>\n      <set>\n        <option value=\"bundled-python-sdk-4e2b1448bda8-9a97661f3031-com.jetbrains.pycharm.pro.sharedIndexes.bundled-PY-252.27397.106\" />\n      </set>\n    </attachedChunks>\n  </component>\n  <component name=\"TaskManager\">\n    <task active=\"true\" id=\"Default\" summary=\"Default task\">\n      <changelist id=\"79b4b04e-1bda-4d14-af19-3bc64d834760\" name=\"Changes\" comment=\"\" />\n      <created>1764243522340</created>\n      <option name=\"number\" value=\"Default\" />\n      <option name=\"presentableId\" value=\"Default\" />\n      <updated>1764243522340</updated>\n    </task>\n    <task id=\"LOCAL-00001\" summary=\"Update README.md\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1764245185368</created>\n      <option name=\"number\" value=\"00001\" />\n      <option name=\"presentableId\" value=\"LOCAL-00001\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1764245185368</updated>\n    </task>\n    <task id=\"LOCAL-00002\" summary=\"Update README.md\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1764245290802</created>\n      <option name=\"number\" value=\"00002\" />\n      <option name=\"presentableId\" value=\"LOCAL-00002\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1764245290802</updated>\n    </task>\n    <task id=\"LOCAL-00003\" summary=\"Update README.md\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1764246515308</created>\n      <option name=\"number\" value=\"00003\" />\n      <option name=\"presentableId\" value=\"LOCAL-00003\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1764246515308</updated>\n    </task>\n    <task id=\"LOCAL-00004\" summary=\"Update README.md\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1764247170857</created>\n      <option name=\"number\" value=\"00004\" />\n      <option name=\"presentableId\" value=\"LOCAL-00004\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1764247170857</updated>\n    </task>\n    <task id=\"LOCAL-00005\" summary=\"Update README.md\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1764247285479</created>\n      <option name=\"number\" value=\"00005\" />\n      <option name=\"presentableId\" value=\"LOCAL-00005\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1764247285479</updated>\n    </task>\n    <task id=\"LOCAL-00006\" summary=\"Update README.md\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1764247346448</created>\n      <option name=\"number\" value=\"00006\" />\n      <option name=\"presentableId\" value=\"LOCAL-00006\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1764247346448</updated>\n    </task>\n    <task id=\"LOCAL-00007\" summary=\"Update README.md\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1764315589154</created>\n      <option name=\"number\" value=\"00007\" />\n      <option name=\"presentableId\" value=\"LOCAL-00007\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1764315589154</updated>\n    </task>\n    <task id=\"LOCAL-00008\" summary=\"Update README.md\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1764315604641</created>\n      <option name=\"number\" value=\"00008\" />\n      <option name=\"presentableId\" value=\"LOCAL-00008\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1764315604641</updated>\n    </task>\n    <task id=\"LOCAL-00009\" summary=\"Update README.md\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1764596271563</created>\n      <option name=\"number\" value=\"00009\" />\n      <option name=\"presentableId\" value=\"LOCAL-00009\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1764596271563</updated>\n    </task>\n    <task id=\"LOCAL-00010\" summary=\"Update README.md\">\n      <option name=\"closed\" value=\"true\" />\n      <created>1764596693337</created>\n      <option name=\"number\" value=\"00010\" />\n      <option name=\"presentableId\" value=\"LOCAL-00010\" />\n      <option name=\"project\" value=\"LOCAL\" />\n      <updated>1764596693337</updated>\n    </task>\n    <option name=\"localTasksCounter\" value=\"11\" />\n    <servers />\n  </component>\n  <component name=\"Vcs.Log.Tabs.Properties\">\n    <option name=\"TAB_STATES\">\n      <map>\n        <entry key=\"MAIN\">\n          <value>\n            <State>\n              <option name=\"CUSTOM_BOOLEAN_PROPERTIES\">\n                <map>\n                  <entry key=\"Show.Git.Branches\" value=\"true\" />\n                </map>\n              </option>\n            </State>\n          </value>\n        </entry>\n      </map>\n    </option>\n  </component>\n  <component name=\"VcsManagerConfiguration\">\n    <MESSAGE value=\"Update README.md\" />\n    <option name=\"LAST_COMMIT_MESSAGE\" value=\"Update README.md\" />\n  </component>\n</project>
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/.idea/workspace.xml b/.idea/workspace.xml
+--- a/.idea/workspace.xml	(revision 8ead579efcda4aed20ac7be75f110c7c6a107e63)
++++ b/.idea/workspace.xml	(date 1764597636347)
+@@ -5,7 +5,8 @@
+   </component>
+   <component name="ChangeListManager">
+     <list default="true" id="79b4b04e-1bda-4d14-af19-3bc64d834760" name="Changes" comment="Update README.md">
+-      <change beforePath="$PROJECT_DIR$/custom_components/waviot_updater/manifest.json" beforeDir="false" afterPath="$PROJECT_DIR$/custom_components/waviot_updater/manifest.json" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
++      <change beforePath="$PROJECT_DIR$/custom_components/waviot_updater/config_flow.py" beforeDir="false" afterPath="$PROJECT_DIR$/custom_components/waviot_updater/config_flow.py" afterDir="false" />
+     </list>
+     <option name="SHOW_DIALOG" value="false" />
+     <option name="HIGHLIGHT_CONFLICTS" value="true" />
+@@ -30,12 +31,12 @@
+     &quot;state&quot;: &quot;OPEN&quot;
+   }
+ }</component>
+-  <component name="GithubPullRequestsUISettings">{
+-  &quot;selectedUrlAndAccountId&quot;: {
+-    &quot;url&quot;: &quot;https://github.com/Yury1873/hass-waviot.git&quot;,
+-    &quot;accountId&quot;: &quot;154f4e98-41e8-4d4d-9ec9-db2dd5ca9121&quot;
+-  }
+-}</component>
++  <component name="GithubPullRequestsUISettings"><![CDATA[{
++  "selectedUrlAndAccountId": {
++    "url": "https://github.com/Yury1873/hass-waviot.git",
++    "accountId": "c275a9a1-26d3-4b36-bcdc-c13f11048355"
++  }
++}]]></component>
+   <component name="ProjectColorInfo">{
+   &quot;associatedIndex&quot;: 8
+ }</component>
+@@ -151,7 +152,23 @@
+       <option name="project" value="LOCAL" />
+       <updated>1764596693337</updated>
+     </task>
+-    <option name="localTasksCounter" value="11" />
++    <task id="LOCAL-00011" summary="Update README.md">
++      <option name="closed" value="true" />
++      <created>1764596802539</created>
++      <option name="number" value="00011" />
++      <option name="presentableId" value="LOCAL-00011" />
++      <option name="project" value="LOCAL" />
++      <updated>1764596802539</updated>
++    </task>
++    <task id="LOCAL-00012" summary="Update README.md">
++      <option name="closed" value="true" />
++      <created>1764596986430</created>
++      <option name="number" value="00012" />
++      <option name="presentableId" value="LOCAL-00012" />
++      <option name="project" value="LOCAL" />
++      <updated>1764596986430</updated>
++    </task>
++    <option name="localTasksCounter" value="13" />
+     <servers />
+   </component>
+   <component name="Vcs.Log.Tabs.Properties">
