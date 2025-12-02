@@ -7,4 +7,4 @@ CONF_API_KEY = "api_key"
 CONF_MODEM_ID = "modem_id"
 UPDATE_INTERVAL = 1200  # 20 minutes
 BASE_URL: Final = "https://lk.waviot.ru"
-API_URL: Final = f"{BASE_URL}/api"
+API_URL: Final = f"{BASE_URL}/api."
