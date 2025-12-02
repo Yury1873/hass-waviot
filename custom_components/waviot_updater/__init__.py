@@ -22,7 +22,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     modem_id = entry.data[const.CONF_MODEM_ID]
 
     hass.data.setdefault(const.DOMAIN, {})  # в примере наоборот с пред. строкой
-    coordinator = WaviotDataUpdateCoordinator(hass, api_key, modem_id)
+    coordinator = WaviotDataUpdateCoordinator(hass, entry)
     hass.data[const.DOMAIN][entry.entry_id] = coordinator
     await coordinator.async_config_entry_first_refresh()
 

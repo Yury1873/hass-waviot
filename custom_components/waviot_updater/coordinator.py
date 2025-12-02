@@ -2,9 +2,17 @@
 import aiohttp
 from datetime import datetime, timedelta, timezone
 import logging
+
+import async_timeout
+from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryAuthFailed
+from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+
 #from .const import UPDATE_INTERVAL, BASE_URL
-from . import const
+from . import const, waviot_client, waviot_api
 
 
 _LOGGER = logging.getLogger(__name__)
@@ -12,16 +20,22 @@ _LOGGER = logging.getLogger(__name__)
 class WaviotDataUpdateCoordinator(DataUpdateCoordinator):
     """Coordinator to fetch WAVIoT modem and energy data safely."""
 
-    def __init__(self, hass, api_key, modem_id):
+    def __init__(self, hass: HomeAssistant, entry: ConfigEntry):
         self.hass = hass
-        self.api_key = api_key
-        self.modem_id = modem_id
+        self.api_key = entry.data[const.CONF_API_KEY]
+        self.modem_id = entry.data[const.CONF_MODEM_ID]
         self.data = {}
         super().__init__(
             hass,
             _LOGGER,
-            name=f"WAVIoT Modem {modem_id}",
+            name=f"WAVIoT Modem {self.modem_id}",
             update_interval=timedelta(seconds=const.UPDATE_INTERVAL),
+        )
+
+        self.api = waviot_api.WaviotApi(
+            waviot_client.WaviotClient(
+                async_get_clientsession(hass)
+            )
         )
 
     async def _async_update_data(self):
