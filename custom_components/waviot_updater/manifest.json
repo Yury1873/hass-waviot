@@ -1,5 +1,5 @@
 {
-  "domain": "waviot_getter",
+  "domain": "waviot_updater",
   "name": "Waviot WAVIoT.ru",
   "codeowners": ["@Yury1873"],
   "config_flow": true,
