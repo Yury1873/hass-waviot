@@ -13,7 +13,7 @@ from . import const
 from .coordinator import WaviotDataUpdateCoordinator
 
 _LOGGER = logging.getLogger(__name__)
-PLATFORMS: Final = ["sensor"]
+#PLATFORMS: Final = ["sensor"]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up WAVIoT integration from config entry."""
