@@ -13,13 +13,13 @@ jobs:
       - name: ZIP Component folder
         run: |
           cd ${{ github.workspace }}/custom_components/waviot_updater/
-          zip -r pesc.zip ./
+          zip -r waviot_updater.zip ./
 
       - name: Upload zip to release
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           file: ${{ github.workspace }}/custom_components/waviot_updater/waviot_updater.zip
-          asset_name: pesc.zip
+          asset_name: waviot_updater.zip
           tag: ${{ github.ref }}
           overwrite: true
