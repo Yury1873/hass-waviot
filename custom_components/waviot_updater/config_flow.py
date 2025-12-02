@@ -1,6 +1,7 @@
 from homeassistant import config_entries
 from . import const
 import voluptuous as vol
+from typing import Any, Dict, Final, Optional
 
 class WaviotFlowHandler(config_entries.ConfigFlow, domain=  const.DOMAIN):
     VERSION = 1
