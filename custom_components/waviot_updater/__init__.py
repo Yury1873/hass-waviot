@@ -17,9 +17,9 @@ PLATFORMS: Final = ["sensor"]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up WAVIoT integration from config entry."""
-    _LOGGER.debug("Setup %s (%s)", entry.title, entry.data[const.CONF_MODEM_ID])
+    _LOGGER.debug("Setup %s (%s)", entry.title, entry.data[const.CONF_API_KEY])
     api_key = entry.data[const.CONF_API_KEY]
-    modem_id = entry.data[const.CONF_MODEM_ID]
+    #modem_id = entry.data[const.CONF_MODEM_ID]
 
     hass.data.setdefault(const.DOMAIN, {})  # в примере наоборот с пред. строкой
     coordinator = WaviotDataUpdateCoordinator(hass, entry)
@@ -35,7 +35,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
-    _LOGGER.debug("Unload %s (%s)", entry.title, entry.data[const.CONF_MODEM_ID])
+    _LOGGER.debug("Unload %s (%s)", entry.title, entry.data[const.CONF_API_KEY])
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
         hass.data[const.DOMAIN].pop(entry.entry_id)
