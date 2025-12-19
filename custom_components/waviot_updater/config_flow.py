@@ -46,7 +46,7 @@ class WaviotFlowHandler(config_entries.ConfigFlow, domain=  const.DOMAIN):
         if user_input is not None:
             self.context[_API_KEY] = user_input[_API_KEY]
 #            return self.async_create_entry(title=f"Modem {user_input[const.CONF_API_KEY]}", data=user_input)
-            return self.async_create_entry(title=f"Локация {await self.api.settlement_name}", data=user_input)
+            return self.async_create_entry(title= await self.api.settlement_name, data=user_input)
 
         schema = vol.Schema({
             vol.Required(const.CONF_API_KEY): str

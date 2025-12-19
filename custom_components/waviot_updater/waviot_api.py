@@ -1,140 +1,37 @@
-import asyncio
 import logging
-from collections import namedtuple
-from datetime import datetime
-from typing import Dict, List, Optional
+import asyncio
 
-from homeassistant.util import slugify
+from collections import namedtuple
+import datetime
+from typing import Dict
 from . import waviot_client, const
 
 _LOGGER = logging.getLogger(__name__)
+lock = asyncio.Lock()
 
-#Modem=namedtuple('Modem','modem_id tree_name registrators')
-
-
-
-class Modem:
-    #__slots__ = ("id", "serial")
-
-    def __init__(
-        self,
-        modem: waviot_client.Modem,
-    ) -> None:
-
-        self._modem_id = modem['modem_id']
-        self._locality = modem['tree_name']
-        self.registrators = modem['registrators']
-        #self.serial = "serial"
-        #self.subservice_id = "dfsf"
-        #self.id = modem["id"]["registration"]
-        #self.serial = modem["serial"]
-        #self.subservice_id = modem["subserviceId"]
-    @property
-    def locality(self) ->str:
-        return self._locality
-
-    @property
-    def modem_id(self) ->str:
-        return self._modem_id
-
-    def __repr__(self) -> str:
-        return (
-            self.__class__.__name__
-            + f"[modem_id={self.modem_id}, serial={self._locality}]"
-        )
-
-class Registrator:
-    #__slots__ = ("id", "channel_id", "modem_id", "name","unit_id","serial","last_value","last_value_timestamp")
-
-    def __init__(
-        self,
-        modem_id: str,
-        raw_data
-    ) -> None:
-        self.registrator_id: str = raw_data['id']
-        self.channel_id = raw_data['channel_id']
-        self.modem_id: str = modem_id
-        self.name = raw_data['name']
-        self.unit_id = raw_data['unit_id']
-        self.serial = raw_data['serial']
-        self.last_value = raw_data['last_value']
-        self.last_value_timestamp = raw_data['last_value_timestamp']
-        #self.value = ind["previousReading"]
-        #self.date = (
-        #    datetime.strptime(ind["previousReadingDate"], "%d.%m.%Y").date()
-        #    if ind["previousReadingDate"] is not None
-        #    else None
-        #self.unit = ind["unit"]
-        #self.name = ind["scaleName"]
-        #self.scale_id = ind["meterScaleId"]
-        #self.account = account
-        #self.Registrator = Registrator
-
-    @property
-    def id(self) -> str:
-        #return f"{self.Registrator.id}_{self.scale_id}"
-        return f"{self.Registrator.chanel_id}"
-
-    @property
-    def auto(self) -> bool:
-        return self.account.type == "auto"
-
-    def __repr__(self) -> str:
-        return (
-                self.__class__.__name__
-                + f"[id={self.id}, channel_id={self.channel_id}, name={self.name}, "
-                + f"unit_id={self.unit_id},modem serial={self.serial}, "
-                + f"last_value={self.last_value}, last_value_timestamp={self.last_value_timestamp}]"
-        )
+Registrator_key = namedtuple('Registrator_key', ['modem_id', 'channel_id'])
 
 
-#class Account:
+#############################
+class ResponseData:
+    def __init__(self, req_type: str,response_data: Dict, ) -> None:
+        self.req_type= req_type
+        self.response_data = response_data
+        self.resp_timestamp = datetime.datetime.now()
 
-#    account_info = {}
-#    def __init__(self,*args,**account_info):
-#        self.account_info = account_info
 
+#############################
 class WaviotApi:
-    #_profile: Optional[pesc_client.Profile] = None
- #   _modems: List[Modem] = []
-
-    #_groups: List[Group] = []
-    #_tariffs: Dict[int, list[Tariff]] = {}
-    #_subservices: Dict[int, pesc_client.Subservice] = {}
-
     def __init__(self, client: waviot_client.WaviotClient) -> None:
         _LOGGER.debug("Initialize, api_key %s", client._api_key)
         self.client = client
         self._profile = None
-        self._modems: List[Modem] = []
-        self._registrators: Dict[str, waviot_client.Modem] = {}
-        self._load_modems()
+        self._registrators_raw: Dict[Registrator_key, Dict] = {}
+        self._balances_daily: Dict[Registrator_key, Dict] = {}
 
     @property
     async def settlement_name(self) -> str:
         return await self.client.get_settlement_name()
-
-    async def _load_modems(self):
-        _LOGGER.debug("get async_modems")
-        modems = await self.client.async_modems()
-        for m in modems:
-         #   mod: Modem = Modem(**m)
-          #  self._modems.append(Modem(**m))
-            _LOGGER.debug("rsv modem=%s",(m))
-        for m in modems:
-            self._modems.append( Modem( m ) )
-        #for key_dev, val_dev in element_info['devices'].items():
-        #    _LOGGER.debug("Init modems: modem id - %s", val_dev['modem_id'])
-        #    self._modems[val_dev['modem_id']] = val_dev
-            #print("Data received device: ", val_dv['modem_id'])
-            #for reg_key, reg_val in val_dv['registrators'].items():
-            #    print("registrator: ", reg_val)
-            #for modem in modems:
-             #
-            #for met_ind in meter["indications"]:
-            #    ind = MeterInd(acc, met, met_ind)
-            #    self._meters.append(ind)
-            #    _LOGGER.debug("Got %s", ind)
 
     async def async_fetch_all(self) -> None:
         """Fetch profile and data."""
@@ -147,16 +44,73 @@ class WaviotApi:
             self._profile = await self.client.async_profile()
 
     async def async_fetch_data(self) -> None:
-       await self._load_modems()
+        await self._load_registrators()
+        await self._fetch_daily_balances()
+        await self._fetch_monthly_balances()
+
+    #@property
+    #def registrators(self) -> Dict[Registrator_key,Registrator]:
+    #    return self._registrators
 
     @property
-    def modems(self) -> List[Modem]:
-        """
-        Returns meters without duplicates. A values with an older account will be skipped.
-        """
-        #_LOGGER.debug("api modems: %s",self._modems )
-        #modems: dict[str, Modem] = {}
-        #for modem in sorted(self._modems, key=lambda x: f"{x.modem_id}"):
-         #   modems[modem.id] = modem
-        return self._modems
-        #return list(modems.values())
+    def registrators_raw(self) -> Dict[Registrator_key,Dict]:
+        return self._registrators_raw
+
+    @property
+    def balances_daily_raw(self) -> Dict[Registrator_key,Dict]:
+        return self._balances_daily
+
+    def get_balances(self, key: Registrator_key, type: const.BALANCE_TYPES='daily') -> Dict:
+        match type:
+            case 'daily':
+                return self._balances_daily[key]
+            #case 'monthly':
+            #    return self._balances_daily[key]
+        return {}
+
+    async def _load_registrators(self) -> None:
+        _LOGGER.debug("get _load_registrators")
+        modems = await self.client.async_modems()
+        _LOGGER.debug("responce - modems=%s",modems)
+        async with lock:
+        #pass
+            for m in modems:
+                for ch_id, data in m['registrators'].items():
+                    if ch_id != 'electro_event_log':
+                        reg_key = Registrator_key(modem_id=m['modem_id'], channel_id=ch_id)
+                        _LOGGER.debug("reg_key %s", reg_key)
+                        self._registrators_raw[reg_key]={**data,**const.CHANELS_LIST[ch_id] }
+                        self._registrators_raw[reg_key]['locality_name'] = m['tree_name']
+                        self._registrators_raw[reg_key]['modem_id'] = m['modem_id']
+
+    async def _fetch_daily_balances(self ):
+        _LOGGER.debug("_daily_balance")
+        daily_balances = await self.client.async_balances('daily')
+        _LOGGER.debug("resp _daily_balances: %s",daily_balances)
+       # async with lock:
+        for ch_id, b in daily_balances['balance'].items():
+                if isinstance(b, dict):
+                    for modem_id, data in b['data'].items():
+                        _LOGGER.debug("modem_id: %s data=%s", modem_id, data)
+                        if (ch_id != 'electro_ac_p_lsum_t3') and (ch_id != 'electro_ac_p_lsum_t4'):
+                            reg_key = Registrator_key(modem_id=modem_id, channel_id=ch_id)
+                            _LOGGER.debug("reg_key %s", reg_key)
+                            self._balances_daily[reg_key] = {**data, **const.CHANELS_LIST[ch_id]}
+                            #self._balances_daily[reg_key]['channel_id'] = ch_id
+                            self._balances_daily[reg_key]['locality_name'] = daily_balances['balance']['element_name']
+
+                            #self._registrators_raw[reg_key] = {**data, **const.CHANELS_LIST[ch_id]}
+                            #self._registrators_raw[reg_key]['locality_name'] = m['tree_name']
+                            #self._registrators_raw[reg_key]['modem_id'] = m['modem_id']
+
+
+    async def _fetch_monthly_balances(self):
+        ...
+
+    #def get_registrator( self, modem_id:str, channel_id:str ) -> Registrator:
+     #   return self.get_registrator(Registrator_key(modem_id=modem_id, channel_id=channel_id))
+
+    #def get_registrator( self, key: Registrator_key) -> Registrator:
+     #       return self._registrators[key]
+
+
