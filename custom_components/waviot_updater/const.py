@@ -13,15 +13,15 @@ CHANELS_LIST: Final = {
     'electro_ac_p_lsum_t1': {
         'channel_id': 'electro_ac_p_lsum_t1',
         'obis': '	0100010801FF',
-        'тариф': 'День',
+        'tariff': 'День',
         'tariff_id': '1',
         'tariff_descriptor': 'day',
-        'description': 'Активная энергия к потребителю по сумме фаз, 1 тариф'
+        'description': 'Активная энергия к потребителю по сумме фаз, 1 tariff'
     },
     'electro_ac_p_lsum_t2': {
         'channel_id': 'electro_ac_p_lsum_t2',
         'obis': '	0100010802FF',
-        'тариф': 'Ночь',
+        'tariff': 'Ночь',
         'tariff_id': '2',
         'tariff_descriptor': 'night',
         'description': 'Активная энергия к потребителю по сумме фаз, 2 тариф "ночь"'
@@ -29,7 +29,7 @@ CHANELS_LIST: Final = {
     'electro_ac_p_lsum_t3': {
         'channel_id': 'electro_ac_p_lsum_t3',
         'obis': '	0100010803FF',
-        'тариф': 'тариф 3',
+        'tariff': 'тариф 3',
         'tariff_id': '3',
         'tariff_descriptor': 'semi_peak_tariff_1',
         'description': 'Активная энергия к потребителю по сумме фаз, 3 тариф'
@@ -37,7 +37,7 @@ CHANELS_LIST: Final = {
     'electro_ac_p_lsum_t4': {
         'channel_id': 'electro_ac_p_lsum_t4',
         'obis': '	0100010804FF',
-        'тариф': 'тариф 4',
+        'tariff': 'тариф 4',
         'tariff_id': '4',
         'tariff_descriptor': 'tariff_zone_4',
         'description': 'Активная энергия к потребителю по сумме фаз, 4 тариф'
@@ -45,14 +45,14 @@ CHANELS_LIST: Final = {
     'electro_ac_p_lsum_tsum': {
         'channel_id': 'electro_ac_p_lsum_tsum',
         'obis': '0100010800FF',
-        'тариф': 'Сумма тарифов',
+        'tariff': 'Сумма тарифов',
         'tariff_descriptor': 'sum',
         'description': 'Активная энергия к потребителю по сумме фаз и тарифов'
     },
     'electro_event_log': {
         'channel_id': 'electro_event_log',
         'obis': None,
-        'тариф': None,
+        'tariff': None,
         'tariff_id': None,
         'tariff_descriptor': None,
         'description': 'События'

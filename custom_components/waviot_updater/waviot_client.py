@@ -151,7 +151,7 @@ class WaviotClient:
         #####+++ Добавить обработчик ошибок
         return data
 
-    async def async_balances(self, type: const.BALANCE_TYPES='daily') -> Dict:
+    async def async_balances_old(self, type: const.BALANCE_TYPES) -> Dict:
         #https://lk.waviot.ru/api.data/get_balance_info/?from=1763627460&to=1763627460&elementId=1793084
         _LOGGER.debug("get balance daily")
         #now = datetime.now()
@@ -174,6 +174,33 @@ class WaviotClient:
         data = await self._async_get(f"data/get_balance_info/", params)
         #####+++ Добавить обработчик ошибок
         return data
+
+
+    async def async_balances(self, timestamp_from: int, timestamp_to: int ) -> Dict:
+        #https://lk.waviot.ru/api.data/get_balance_info/?from=1763627460&to=1763627460&elementId=1793084
+        _LOGGER.debug("get balance daily")
+        #now = datetime.now()
+        match type:
+            case 'daily':
+                start_of_day = datetime.combine(datetime.now().date(), time.min)
+                timestamp_from = int(start_of_day.timestamp())
+                timestamp_to = timestamp_from + (60*60*24)
+           # case 'weekly':
+
+            case 'monthly':
+                start_of_month = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+                timestamp_from = int(start_of_month.timestamp())
+                timestamp_to = int(datetime.now().timestamp())
+        params = {
+            "elementId": await self._async_get_element_id(),
+            "from": timestamp_from,
+            "to": timestamp_to
+        }
+        data = await self._async_get(f"data/get_balance_info/", params)
+        #####+++ Добавить обработчик ошибок
+        return data
+
+
 
     async def async_montly_balances(self) -> Dict:
         #https://lk.waviot.ru/api.data/get_balance_info/?from=1763627460&to=1763627460&elementId=1793084

@@ -2,23 +2,16 @@ import logging
 import asyncio
 
 from collections import namedtuple
-import datetime
-from typing import Dict
+#import datetime
+from datetime import datetime, time
+from datetime import datetime
+from typing import Dict, Any
 from . import waviot_client, const
 
 _LOGGER = logging.getLogger(__name__)
 lock = asyncio.Lock()
 
 Registrator_key = namedtuple('Registrator_key', ['modem_id', 'channel_id'])
-
-
-#############################
-class ResponseData:
-    def __init__(self, req_type: str,response_data: Dict, ) -> None:
-        self.req_type= req_type
-        self.response_data = response_data
-        self.resp_timestamp = datetime.datetime.now()
-
 
 #############################
 class WaviotApi:
@@ -28,6 +21,7 @@ class WaviotApi:
         self._profile = None
         self._registrators_raw: Dict[Registrator_key, Dict] = {}
         self._balances_daily: Dict[Registrator_key, Dict] = {}
+        self._balances_monthly: Dict[Registrator_key, Dict] = {}
 
     @property
     async def settlement_name(self) -> str:
@@ -45,27 +39,26 @@ class WaviotApi:
 
     async def async_fetch_data(self) -> None:
         await self._load_registrators()
-        await self._fetch_daily_balances()
-        await self._fetch_monthly_balances()
-
-    #@property
-    #def registrators(self) -> Dict[Registrator_key,Registrator]:
-    #    return self._registrators
+        await self._fetch_balances()
 
     @property
     def registrators_raw(self) -> Dict[Registrator_key,Dict]:
         return self._registrators_raw
 
-    @property
-    def balances_daily_raw(self) -> Dict[Registrator_key,Dict]:
-        return self._balances_daily
+    def get_balances(self,type: const.BALANCE_TYPES ) -> Dict[Registrator_key,Dict]:
+        match type:
+            case 'daily':
+                return self._balances_daily
+            case 'monthly':
+                return self._balances_monthly
+        return {}
 
-    def get_balances(self, key: Registrator_key, type: const.BALANCE_TYPES='daily') -> Dict:
+    def get_registrator_balance(self, key: Registrator_key, type: const.BALANCE_TYPES) -> Dict:
         match type:
             case 'daily':
                 return self._balances_daily[key]
-            #case 'monthly':
-            #    return self._balances_daily[key]
+            case 'monthly':
+                return self._balances_monthly[key]
         return {}
 
     async def _load_registrators(self) -> None:
@@ -73,7 +66,6 @@ class WaviotApi:
         modems = await self.client.async_modems()
         _LOGGER.debug("responce - modems=%s",modems)
         async with lock:
-        #pass
             for m in modems:
                 for ch_id, data in m['registrators'].items():
                     if ch_id != 'electro_event_log':
@@ -82,35 +74,38 @@ class WaviotApi:
                         self._registrators_raw[reg_key]={**data,**const.CHANELS_LIST[ch_id] }
                         self._registrators_raw[reg_key]['locality_name'] = m['tree_name']
                         self._registrators_raw[reg_key]['modem_id'] = m['modem_id']
+                        self._registrators_raw[reg_key]['last_value_date'] = datetime.fromtimestamp(data['last_value_timestamp'])
 
-    async def _fetch_daily_balances(self ):
-        _LOGGER.debug("_daily_balance")
-        daily_balances = await self.client.async_balances('daily')
-        _LOGGER.debug("resp _daily_balances: %s",daily_balances)
-       # async with lock:
-        for ch_id, b in daily_balances['balance'].items():
+    async def _fetch_balances(self):
+
+        def _extract_balances(data_raw: Dict, output_dict: Dict):
+            for ch_id, b in data_raw['balance'].items():
                 if isinstance(b, dict):
-                    for modem_id, data in b['data'].items():
-                        _LOGGER.debug("modem_id: %s data=%s", modem_id, data)
+                    for modem_id, val in b['data'].items():
+                        _LOGGER.debug("modem_id: %s data=%s", modem_id, val)
                         if (ch_id != 'electro_ac_p_lsum_t3') and (ch_id != 'electro_ac_p_lsum_t4'):
                             reg_key = Registrator_key(modem_id=modem_id, channel_id=ch_id)
-                            _LOGGER.debug("reg_key %s", reg_key)
-                            self._balances_daily[reg_key] = {**data, **const.CHANELS_LIST[ch_id]}
-                            #self._balances_daily[reg_key]['channel_id'] = ch_id
-                            self._balances_daily[reg_key]['locality_name'] = daily_balances['balance']['element_name']
+                            output_dict[reg_key] = {**val, **const.CHANELS_LIST[ch_id]}
+                            output_dict[reg_key]['locality_name'] = data_raw['balance']['element_name']
+                            output_dict[reg_key]['last_message_date'] = datetime.fromtimestamp(val['last_message_timestamp'])
+                            output_dict[reg_key]['from'] = datetime.fromtimestamp(timestamp_from)
+                            output_dict[reg_key]['to'] = datetime.fromtimestamp(timestamp_to)
+            return
 
-                            #self._registrators_raw[reg_key] = {**data, **const.CHANELS_LIST[ch_id]}
-                            #self._registrators_raw[reg_key]['locality_name'] = m['tree_name']
-                            #self._registrators_raw[reg_key]['modem_id'] = m['modem_id']
+        _LOGGER.debug("_daily_balance")
+        #daily
+        start_of_day = datetime.combine(datetime.now().date(), time.min)
+        timestamp_from = int(start_of_day.timestamp())
+        timestamp_to = timestamp_from + (60*60*24)
+        balances = await self.client.async_balances(timestamp_from, timestamp_to)
+        _extract_balances(balances, self._balances_daily)
+        _LOGGER.debug("resp _monthly_balances: %s", balances)
+        #'monthly':
+        start_of_month = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+        timestamp_from = int(start_of_month.timestamp())
+        timestamp_to = int(datetime.now().timestamp())
+        balances = await self.client.async_balances(timestamp_from, timestamp_to)
+        _extract_balances(balances, self._balances_monthly)
 
-
-    async def _fetch_monthly_balances(self):
-        ...
-
-    #def get_registrator( self, modem_id:str, channel_id:str ) -> Registrator:
-     #   return self.get_registrator(Registrator_key(modem_id=modem_id, channel_id=channel_id))
-
-    #def get_registrator( self, key: Registrator_key) -> Registrator:
-     #       return self._registrators[key]
-
-
+    def get_registrator_raw( self, key: Registrator_key) -> Dict[Registrator_key,Any]:
+            return self._registrators_raw[key]

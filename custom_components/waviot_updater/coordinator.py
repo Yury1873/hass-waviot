@@ -39,14 +39,12 @@ class WaviotDataUpdateCoordinator(DataUpdateCoordinator):
             )
         )
 
-
     async def _async_update_data(self):
         await self._fetch()
 
     async def _fetch(self):
        async with async_timeout.timeout(60):
              await self.api.async_fetch_all()
-
 
     def _compute_latest(self):
         """Compute only the latest reading value."""
