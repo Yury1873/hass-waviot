@@ -153,7 +153,7 @@ class WaviotBalanceSensor(_WaviotBaseSensor):
         self._registrator_key: waviot_api.Registrator_key = waviot_api.Registrator_key(
                                                                         modem_id=balance_data['modem_id'],
                                                                         channel_id=balance_data['channel_id']
-                                                                )
+                                                            )
         self._update_state_attributes()
 
     @callback

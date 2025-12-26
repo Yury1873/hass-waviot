@@ -9,6 +9,17 @@ UPDATE_INTERVAL = 1200  # 20 minutes
 BASE_URL: Final = "https://lk.waviot.ru"
 API_URL: Final = f"{BASE_URL}/api."
 BALANCE_TYPES: Final = Literal['daily', 'weekly', 'monthly']
+REQUIRED_KEYS_REGISTRATOR_RESP: Final = {
+                                    "id",
+                                    "name",
+                                    "channel_id",
+                                    "unit_id",
+                                    "serial",
+                                    "last_value",
+                                    "last_value_timestamp",
+                        }
+
+
 CHANELS_LIST: Final = {
     'electro_ac_p_lsum_t1': {
         'channel_id': 'electro_ac_p_lsum_t1',

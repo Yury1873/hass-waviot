@@ -12,18 +12,10 @@ _LOGGER = logging.getLogger(__name__)
 LOGIN_TYPE_API_KEY: Final = "api_key"
 LOGIN_TYPE_EMAIL: Final = "email"
 
-class Modem(TypedDict):
-    id: str
-    serial: str
-    #indications: List[MeterIndication]
-    #subserviceId: int
-    #status: str
-
 class ProfileName(TypedDict):
     first: str
     last: str
     patronymic: Optional[str]
-
 
 class Profile(TypedDict):
     phone: str
@@ -41,14 +33,7 @@ class WaviotClient:
         self.headers = None
         self._element_id = "1793084"
 
-      #  self._headers = {
-       #     aiohttp.hdrs.ACCEPT: "application/json, text/plain, */*",
-        #    aiohttp.hdrs.CONTENT_TYPE: "application/json",
-         #   "Customer": "ikus-spb",
-       # }
-        #self.auth = auth
-        #if self.auth:
-         #   self._updata_auth(auth)
+
     @staticmethod
     async def _async_response_json(
             result: aiohttp.ClientResponse, empty_body_request: bool = False
@@ -94,6 +79,7 @@ class WaviotClient:
 
     async def _async_get(self, url: str, params=None):
         result = await self._async_get_raw(url, params)
+        _LOGGER.debug(" result %s",result)
         json = await self._async_response_json(result)
         if _LOGGER.isEnabledFor(logging.DEBUG):
             if isinstance(json, list) and len(json) > 100:
@@ -108,7 +94,6 @@ class WaviotClient:
         params = {
            'key': self._api_key
         }
-        #https: // lk.waviot.ru / api.tree / get_element /
         url_sufix= "tree/get_element/"
         _LOGGER.debug("get url_sufix: %s", url_sufix)
         data = await self._async_get(url=url_sufix,params=params)
@@ -118,7 +103,7 @@ class WaviotClient:
             _LOGGER.debug("element id: %s", self._element_id)
         return self._element_id
 
-    async def async_modems(self) -> List[Modem]:
+    async def async_modems(self) -> List:
         #https://lk.waviot.ru/api.data/get_full_element_info/?id=1793084
         _LOGGER.debug("get sysnc_modems")
         params = {
@@ -127,8 +112,9 @@ class WaviotClient:
         url= f"{const.API_URL}data/get_full_element_info"
         _LOGGER.debug("get url: %s", url)
         data = await self._async_get(f"data/get_full_element_info/",params)
+        assert data.get('status') == "ok"
         _LOGGER.debug("element resp: %s", data)
-        modems: List[Modem] =[]
+        modems: List = []
         for key_dv, modem_meta in data['devices'].items():
             _LOGGER.debug("Data received device: %s", modem_meta)
             modems.append(modem_meta)
@@ -136,44 +122,6 @@ class WaviotClient:
             #    _LOGGER.debug("registrator: ", reg_val)
         _LOGGER.debug("list modems: %s", modems)
         return modems
-
-
-
-    async def async_get_full_element_info(self) -> Dict[str, Any]: #~~ разобраться а нужн ли этот метод
-        #https://lk.waviot.ru/api.data/get_full_element_info/?id=1793084
-        _LOGGER.debug("get full_element_info")
-        params = {
-            "id": await self._async_get_element_id()
-        }
-        url= f"{const.API_URL}data/get_full_element_info"
-        _LOGGER.debug("get url: %s", url)
-        data = await self._async_get(f"data/get_full_element_info/",params)
-        #####+++ Добавить обработчик ошибок
-        return data
-
-    async def async_balances_old(self, type: const.BALANCE_TYPES) -> Dict:
-        #https://lk.waviot.ru/api.data/get_balance_info/?from=1763627460&to=1763627460&elementId=1793084
-        _LOGGER.debug("get balance daily")
-        #now = datetime.now()
-        match type:
-            case 'daily':
-                start_of_day = datetime.combine(datetime.now().date(), time.min)
-                timestamp_from = int(start_of_day.timestamp())
-                timestamp_to = timestamp_from + (60*60*24)
-           # case 'weekly':
-
-            case 'monthly':
-                start_of_month = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-                timestamp_from = int(start_of_month.timestamp())
-                timestamp_to = int(datetime.now().timestamp())
-        params = {
-            "elementId": await self._async_get_element_id(),
-            "from": timestamp_from,
-            "to": timestamp_to
-        }
-        data = await self._async_get(f"data/get_balance_info/", params)
-        #####+++ Добавить обработчик ошибок
-        return data
 
 
     async def async_balances(self, timestamp_from: int, timestamp_to: int ) -> Dict:
@@ -199,26 +147,6 @@ class WaviotClient:
         data = await self._async_get(f"data/get_balance_info/", params)
         #####+++ Добавить обработчик ошибок
         return data
-
-
-
-    async def async_montly_balances(self) -> Dict:
-        #https://lk.waviot.ru/api.data/get_balance_info/?from=1763627460&to=1763627460&elementId=1793084
-        _LOGGER.debug("get balance montly")
-        # Выравнивание на начало месяца
-        start_of_month = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-        timestamp_from = int(start_of_month.timestamp())
-        timestamp_to = int(datetime.now().timestamp())
-        params = {
-            "elementId": await self._async_get_element_id(),
-            "from": timestamp_from,
-            "to": timestamp_to
-        }
-        data = await self._async_get(f"data/get_balance_info/", params)
-        #####+++ Добавить обработчик ошибок
-        return data
-
-
 
     async def get_settlement_name(self) -> str:
         def _get_setlement_recursion(node) -> str:
