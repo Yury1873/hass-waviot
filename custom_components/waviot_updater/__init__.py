@@ -23,7 +23,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     hass.data.setdefault(const.DOMAIN, {})
     coord = WaviotDataUpdateCoordinator(hass, entry)
-    hass.data[const.DOMAIN][entry.entry_id] = coordinator
+    hass.data[const.DOMAIN][entry.entry_id] = coord
     await coord.async_config_entry_first_refresh()
 
     # add options handler

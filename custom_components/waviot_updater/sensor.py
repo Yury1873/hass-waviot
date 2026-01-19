@@ -22,20 +22,20 @@ async def async_setup_entry(
             async_add_entities: Callable
 ):
     _LOGGER.debug("Setup %s ", entry.title)
-    coordinator: WaviotDataUpdateCoordinator = hass.data[const.DOMAIN][entry.entry_id]
+    coord: WaviotDataUpdateCoordinator = hass.data[const.DOMAIN][entry.entry_id]
     sensors = []
 
-    for key, registrator_raw in coordinator.api.registrators_raw.items():
+    for key, registrator_raw in coord.api.registrators_raw.items():
         _LOGGER.debug('registrator_raw: %s', registrator_raw)
-        sensors.append( WaviotRegistratorSensor( coordinator, registrator_raw))
+        sensors.append( WaviotRegistratorSensor( coord, registrator_raw))
 
-    for vl in coordinator.api.get_balances(type='daily').values():
+    for vl in coord.api.get_balances(balance_type='daily').values():
         _LOGGER.debug('daily_balances_raw: %s', vl)
-        sensors.append( WaviotBalanceSensor( coordinator, balance_data=vl, balance_type='daily'))
+        sensors.append( WaviotBalanceSensor( coord, balance_data=vl, balance_type='daily'))
 
-    for vl in coordinator.api.get_balances(type='monthly').values():
+    for vl in coord.api.get_balances(balance_type='monthly').values():
         _LOGGER.debug('monthly_balances_raw: %s', vl)
-        sensors.append( WaviotBalanceSensor( coordinator, balance_data=vl, balance_type='monthly'))
+        sensors.append( WaviotBalanceSensor( coord, balance_data=vl, balance_type='monthly'))
     async_add_entities( sensors)
 
 ################################
