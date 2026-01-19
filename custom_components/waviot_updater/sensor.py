@@ -1,8 +1,7 @@
 # sensor.py - Fixed subscriptable error, modernized to use SensorEntity and CoordinatorEntity, added device_info
 
 import logging
-from datetime import datetime
-from typing import Callable, List, Any, Dict
+from typing import Callable, Any, Dict
 from homeassistant.components import sensor
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import UnitOfEnergy
@@ -10,11 +9,10 @@ from homeassistant.core import (
     HomeAssistant,
     callback
 )
-from homeassistant.helpers.entity import EntityCategory
 from homeassistant.helpers.device_registry import DeviceEntryType
-from homeassistant.helpers.entity import DeviceInfo, EntityCategory
+from homeassistant.helpers.entity import DeviceInfo #, EntityCategory
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
-from . import WaviotDataUpdateCoordinator, const, waviot_api, waviot_client
+from . import WaviotDataUpdateCoordinator, const, waviot_api, waviot_client, my_types
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -25,7 +23,7 @@ async def async_setup_entry(
 ):
     _LOGGER.debug("Setup %s ", entry.title)
     coordinator: WaviotDataUpdateCoordinator = hass.data[const.DOMAIN][entry.entry_id]
-    sensors: List[WaviotRegistratorSensor] = []
+    sensors = []
 
     for key, registrator_raw in coordinator.api.registrators_raw.items():
         _LOGGER.debug('registrator_raw: %s', registrator_raw)
@@ -93,7 +91,7 @@ class WaviotRegistratorSensor(_WaviotBaseSensor):
             model = f"modem ID: {registrator_raw['modem_id']}"
         )
         self._registrator_raw = registrator_raw
-        self._registrator_key: waviot_api.Registrator_key = waviot_api.Registrator_key(modem_id=registrator_raw['modem_id'],
+        self._registrator_key: my_types.Registrator_key = my_types.Registrator_key(modem_id=registrator_raw['modem_id'],
                                                                                        channel_id=registrator_raw['channel_id'])
         self._update_state_attributes()
 
@@ -125,8 +123,8 @@ class WaviotRegistratorSensor(_WaviotBaseSensor):
     def available(self) -> bool:
         return True
 
-    def __str__(self):
-        return f"{self._registrator_raw.last_value}"
+    #def __str__(self):
+    #    return f"{self._registrator_raw.last_value}"
 
 ################################
 class WaviotBalanceSensor(_WaviotBaseSensor):
@@ -139,8 +137,7 @@ class WaviotBalanceSensor(_WaviotBaseSensor):
         self,
         coordinator: WaviotDataUpdateCoordinator,
         balance_data: Dict[str, Any],
-        balance_type: const.BALANCE_TYPES,
-        id_suffix: str = ''
+        balance_type: my_types.BALANCE_TYPES,
     ):
         super().__init__(
             coordinator = coordinator,
@@ -149,8 +146,8 @@ class WaviotBalanceSensor(_WaviotBaseSensor):
             model = f"modem ID: {balance_data['modem_id']}"
         )
         self.balance = balance_data
-        self._balance_type: const.BALANCE_TYPES  = balance_type
-        self._registrator_key: waviot_api.Registrator_key = waviot_api.Registrator_key(
+        self._balance_type: my_types.BALANCE_TYPES  = balance_type
+        self._registrator_key: my_types.Registrator_key = my_types.Registrator_key(
                                                                         modem_id=balance_data['modem_id'],
                                                                         channel_id=balance_data['channel_id']
                                                             )
@@ -190,5 +187,5 @@ class WaviotBalanceSensor(_WaviotBaseSensor):
     def available(self) -> bool:
         return True
 
-    def __str__(self):
-        return f"{self.balance.last_value}"
+    #def __str__(self):
+    #    return f"{self.balance.last_value}"

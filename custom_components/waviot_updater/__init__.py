@@ -3,10 +3,10 @@ from typing import Final
 
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryAuthFailed
-from homeassistant.helpers import config_validation as cv
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+#from homeassistant.exceptions import ConfigEntryAuthFailed
+#from homeassistant.helpers import config_validation as cv
+#from homeassistant.helpers.aiohttp_client import async_get_clientsession
+#from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 # from .const import DOMAIN, CONF_API_KEY, CONF_MODEM_ID
 from . import const
@@ -18,13 +18,13 @@ PLATFORMS: Final = ["sensor"]
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up WAVIoT integration from config entry."""
     _LOGGER.debug("Setup %s (%s)", entry.title, entry.data[const.CONF_API_KEY])
-    api_key = entry.data[const.CONF_API_KEY]
+    #api_key = entry.data[const.CONF_API_KEY]
     #modem_id = entry.data[const.CONF_MODEM_ID]
 
-    hass.data.setdefault(const.DOMAIN, {})  # в примере наоборот с пред. строкой
-    coordinator = WaviotDataUpdateCoordinator(hass, entry)
+    hass.data.setdefault(const.DOMAIN, {})
+    coord = WaviotDataUpdateCoordinator(hass, entry)
     hass.data[const.DOMAIN][entry.entry_id] = coordinator
-    await coordinator.async_config_entry_first_refresh()
+    await coord.async_config_entry_first_refresh()
 
     # add options handler
     #if not entry.update_listeners:

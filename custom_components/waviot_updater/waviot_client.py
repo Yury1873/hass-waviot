@@ -1,11 +1,13 @@
 import json as jsonmod
 import logging
 from datetime import datetime, time
-from typing import Final, List, Dict, TypedDict, Any, Optional
+import time
+#import datetime
+from typing import Final, List, Dict, TypedDict,  Optional
 
 import aiohttp
 from homeassistant import exceptions
-from . import const
+from . import const,  my_types
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -27,11 +29,11 @@ class WaviotClient:
     _API_URL: Final = const.API_URL
 
     def __init__(
-            self, session: aiohttp.ClientSession,  api_key: str ) -> None:
+            self, session: aiohttp.ClientSession,  api_key ) -> None:
         self._api_key = api_key
         self._session = session
         self.headers = None
-        self._element_id = "1793084"
+        #self._element_id = ""
 
 
     @staticmethod
@@ -77,8 +79,8 @@ class WaviotClient:
         _LOGGER.debug(f"url= {url}, params={params_local}")
         return await self._session.get(url, params=params_local)
 
-    async def _async_get(self, url: str, params=None):
-        result = await self._async_get_raw(url, params)
+    async def _async_get(self, url_sufix: str, params=None):
+        result = await self._async_get_raw(url_sufix, params)
         _LOGGER.debug(" result %s",result)
         json = await self._async_response_json(result)
         if _LOGGER.isEnabledFor(logging.DEBUG):
@@ -86,7 +88,7 @@ class WaviotClient:
                 json_str = "result is too large to display"
             else:
                 json_str = "\n" + jsonmod.dumps(json, ensure_ascii=False, indent=None)
-            _LOGGER.debug("%s: %s", url, json_str)
+            _LOGGER.debug("%s: %s", url_sufix, json_str)
         return json
 
     async def _async_get_element_id(self) -> str:
@@ -96,14 +98,14 @@ class WaviotClient:
         }
         url_sufix= "tree/get_element/"
         _LOGGER.debug("get url_sufix: %s", url_sufix)
-        data = await self._async_get(url=url_sufix,params=params)
+        data = await self._async_get(url_sufix=url_sufix,params=params)
         _LOGGER.debug("element resp: %s", data)
         if data['status'] == 'ok' :
             self._element_id = data['element_id']
             _LOGGER.debug("element id: %s", self._element_id)
         return self._element_id
 
-    async def async_modems(self) -> List:
+    async def async_modems(self) -> list:
         #https://lk.waviot.ru/api.data/get_full_element_info/?id=1793084
         _LOGGER.debug("get sysnc_modems")
         params = {
@@ -123,6 +125,30 @@ class WaviotClient:
         _LOGGER.debug("list modems: %s", modems)
         return modems
 
+    async def async_modems_channels_last_values(self,modem_id: str) -> dict[my_types.Registrator_key, dict]:
+        params = {
+            "modem_id": modem_id,
+            "from": f"{int(time.time())}",
+        }
+        #url= f"{const.API_URL}data/get_full_element_info"
+        url_sufix = "data/get_values/"
+        url = f"{const.API_URL}{url_sufix}"
+        _LOGGER.debug("get url: %s", url)
+        data = await self._async_get(f"{url_sufix}",params)
+        assert data.get('status') == "ok"
+        _LOGGER.debug("resp: %s", data)
+        #item: dict = {}
+        ret: dict[my_types.Registrator_key, dict] = {}
+        for item in data['registrators'].values():
+            if item.get('active') :
+               # print("\n\n",item)
+                val: list = item.get('values')
+                if val is not None:
+                    reg_key: my_types.Registrator_key = my_types.Registrator_key(modem_id = modem_id, channel_id=item.get('channel'))
+                    ret[reg_key] = val[-1]
+                #    print(f"name: {item.get('channel')}")
+                #    print(f"values: {val[-1]}")
+        return ret
 
     async def async_balances(self, timestamp_from: int, timestamp_to: int ) -> Dict:
         #https://lk.waviot.ru/api.data/get_balance_info/?from=1763627460&to=1763627460&elementId=1793084

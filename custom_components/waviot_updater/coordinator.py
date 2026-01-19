@@ -1,15 +1,15 @@
 # coordinator.py - Fetches WAVIoT modem data for the last 3 months
-import aiohttp
+#import aiohttp
 from datetime import datetime, timedelta, timezone
 import logging
 
 import async_timeout
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-from homeassistant.exceptions import ConfigEntryAuthFailed
-from homeassistant.helpers import config_validation as cv
+#from homeassistant.exceptions import ConfigEntryAuthFailed
+#from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator #, UpdateFailed
 
 #from .const import UPDATE_INTERVAL, BASE_URL
 from . import const, waviot_client, waviot_api
