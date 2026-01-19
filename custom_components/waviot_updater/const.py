@@ -1,4 +1,4 @@
-#import datetime
+import datetime
 #from enum import IntFlag
 from typing import Final, Literal
 
@@ -7,6 +7,7 @@ CONF_API_KEY: Final[str] = "api_key"
 
 CONF_MODEM_ID = "modem_id"
 UPDATE_INTERVAL = 1200  # 20 minutes
+DEFAULT_UPDATE_INTERVAL: Final = datetime.timedelta(hours=12)
 BASE_URL: Final = "https://lk.waviot.ru"
 API_URL: Final = f"{BASE_URL}/api."
 
@@ -70,3 +71,8 @@ CHANELS_LIST: Final = {
         'description': 'События'
     }
 }
+
+
+CONF_UPDATE_INTERVAL: Final = "update_interval"
+CONF_DIAGNOSTIC_SENSORS: Final = "diagnostic_sensors"
+CONF_RATES_SENSORS: Final = "rates_sensors"
