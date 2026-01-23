@@ -36,7 +36,6 @@ class WaviotFlowHandler(config_entries.ConfigFlow, domain=  const.DOMAIN):
     async def async_step_user(self, user_input=None):
         if user_input is not None:
             self.context[_API_KEY] = user_input[_API_KEY]
-#            return self.async_create_entry(title=f"Modem {user_input[const.CONF_API_KEY]}", data=user_input)
             return self.async_create_entry(title= await self.api.settlement_name, data=user_input)
 
         schema = vol.Schema({
@@ -64,9 +63,13 @@ async def general_options_schema(
                     "seconds": seconds,
                 }
 
+    #if not hasattr(handler, 'options') or handler.options is None:
+    #        handler.options = {}
+    #handler.options[const.CONF_UPDATE_INTERVAL] = const.DEFAULT_UPDATE_INTERVAL.total_seconds()
+
     return vol.Schema(
             {
-                vol.Optional(
+            vol.Optional(
                 const.CONF_UPDATE_INTERVAL,
                 default=timedelta_to_dict(
                     cv.time_period(
@@ -77,17 +80,61 @@ async def general_options_schema(
                     )
                 ),
             ): selector.DurationSelector(
-                selector.DurationSelectorConfig(enable_day=True),
+                selector.DurationSelectorConfig(enable_day=False),
+            ),
+     #       vol.Optional(
+     #           const.CONF_RATES_SENSORS,
+     #           default=handler.options.get(const.CONF_RATES_SENSORS, True),
+     #       ): selector.BooleanSelector(selector.BooleanSelectorConfig()),
+     #       vol.Optional(
+     #           const.CONF_DIAGNOSTIC_SENSORS,
+     #           default=handler.options.get(const.CONF_DIAGNOSTIC_SENSORS, False),
+     #       ): selector.BooleanSelector(selector.BooleanSelectorConfig()),
+            vol.Optional(
+                const.CONF_POWER_TARRIFF_1,
+                default=handler.options.get(const.CONF_POWER_TARRIFF_1, 0.0),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                 min=0.0,
+                 max=99.99,
+                 step=0.01,
+                mode=selector.NumberSelectorMode.BOX,
+                )
             ),
             vol.Optional(
-                const.CONF_RATES_SENSORS,
-                default=handler.options.get(const.CONF_RATES_SENSORS, True),
-            ): selector.BooleanSelector(selector.BooleanSelectorConfig()),
+                const.CONF_POWER_TARRIFF_2,
+                default=handler.options.get(const.CONF_POWER_TARRIFF_2, 0),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.0,
+                    max=99.99,
+                    step=0.01,
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
             vol.Optional(
-                const.CONF_DIAGNOSTIC_SENSORS,
-                default=handler.options.get(const.CONF_DIAGNOSTIC_SENSORS, False),
-            ): selector.BooleanSelector(selector.BooleanSelectorConfig()),
-        }
+                const.CONF_POWER_TARRIFF_3,
+                default = handler.options.get(const.CONF_POWER_TARRIFF_3, 0),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.0,
+                    max=99.99,
+                    step=0.01,
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            vol.Optional(
+                const.CONF_POWER_TARRIFF_4,
+                default = handler.options.get(const.CONF_POWER_TARRIFF_4, 0),
+            ): selector.NumberSelector(
+                selector.NumberSelectorConfig(
+                    min=0.0,
+                    max=99.99,
+                    step=0.01,
+                    mode=selector.NumberSelectorMode.BOX,
+                )
+            ),
+            }
     )
 
 

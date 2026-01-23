@@ -6,8 +6,8 @@ DOMAIN = "waviot_updater"
 CONF_API_KEY: Final[str] = "api_key"
 
 CONF_MODEM_ID = "modem_id"
-UPDATE_INTERVAL = 1200  # 20 minutes
-DEFAULT_UPDATE_INTERVAL: Final = datetime.timedelta(hours=12)
+#UPDATE_INTERVAL = 1200  # 20 minutes
+DEFAULT_UPDATE_INTERVAL: Final = datetime.timedelta(minutes=20)
 BASE_URL: Final = "https://lk.waviot.ru"
 API_URL: Final = f"{BASE_URL}/api."
 
@@ -76,3 +76,9 @@ CHANELS_LIST: Final = {
 CONF_UPDATE_INTERVAL: Final = "update_interval"
 CONF_DIAGNOSTIC_SENSORS: Final = "diagnostic_sensors"
 CONF_RATES_SENSORS: Final = "rates_sensors"
+CONF_POWER_TARRIFF_1: Final = "Тариф \"День\", стоимость kW/h"
+CONF_POWER_TARRIFF_2: Final = "Тариф \"Ночь\", стоимость kW/h"
+CONF_POWER_TARRIFF_3: Final = "Тариф \"Мультипиковый\", стоимость kW/h"
+CONF_POWER_TARRIFF_4: Final = "Тариф \"Зональный\", стоимость kW/h"
+
+#CONF_DESC_POWER_TARRIFF_2: Final = "desc_power_tarriff_2"

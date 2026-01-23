@@ -98,13 +98,13 @@ class WaviotRegistratorSensor(_WaviotBaseSensor):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle data update."""
-        _LOGGER.debug("Update WaviotRegistratorSensor")
+        _LOGGER.debug("_handle_coordinator_update WaviotRegistratorSensor")
         self._registrator_raw = self.coordinator.api.get_registrator_raw( self._registrator_key)
         self.coordinator.last_update_success = True
         super()._handle_coordinator_update()
 
     def _update_state_attributes(self):
-        _LOGGER.debug("Initialize WaviotRegistratorSensor")
+        _LOGGER.debug("_update_state_attributes WaviotRegistratorSensor")
         self._attr_device_class = sensor.SensorDeviceClass.ENERGY
         self._attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
         self._attr_name = f'Показания "{self._registrator_raw["tariff"]}"'
@@ -156,13 +156,13 @@ class WaviotBalanceSensor(_WaviotBaseSensor):
     @callback
     def _handle_coordinator_update(self) -> None:
         """Handle data update."""
-        _LOGGER.debug("Update WaviotRegistratorSensor")
+        _LOGGER.debug("_handle_coordinator_update WaviotBalanceSensor")
         self.balance = self.coordinator.api.get_registrator_balance(self._registrator_key,self._balance_type)
         self.coordinator.last_update_success = True
         super()._handle_coordinator_update()
 
     def _update_state_attributes(self):
-        _LOGGER.debug("Initialize WaviotRegistratorSensor")
+        _LOGGER.debug(" _update_state_attributes WaviotBalanceSensor")
         self._attr_device_class = sensor.SensorDeviceClass.ENERGY
         self._attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
         match self._balance_type:

@@ -4,6 +4,7 @@ import logging
 #from collections import namedtuple
 #import datetime
 from datetime import time
+#import time
 from datetime import datetime
 from typing import Dict, Any, List
 from . import waviot_client, const, my_types
@@ -24,22 +25,28 @@ class WaviotApi:
         self._registrators: Dict[my_types.Registrator_key, Dict] = {}
         self._balances_daily: Dict[my_types.Registrator_key, Dict] = {}
         self._balances_monthly: Dict[my_types.Registrator_key, Dict] = {}
-
+        self._last_date_timestamp: int = 0
     @property
     async def settlement_name(self) -> str:
         return await self.client.get_settlement_name()
 
     async def async_fetch_all(self) -> None:
         """Fetch data."""
-        await self.async_fetch_data()
+    #    await self.async_fetch_data()
+        delta_time =  datetime.now().timestamp() - self._last_date_timestamp
+        if delta_time > (3600 + 300):  #не долбим запросами, если прошло меньше часа(+5 мин, т.к. бесполезно перв. 5 мин. ждать обн.)
+            _LOGGER.debug(" fetch all data. Delta time %i", delta_time)
+            await self._load_registrators()
+            await self._fetch_balances()
+        else:
+            _LOGGER.debug("skip fetch data. Delta time %i", delta_time)
 
-    async def async_fetch_data(self) -> None:
-        await self._load_registrators()
-        await self._fetch_balances()
+
+   # async def async_fetch_data(self) -> None:
+
 
     async def _load_registrators(self) -> None:
         _LOGGER.debug("get _load_registrators")
-
         modems: List = await self.client.async_modems()
         #_LOGGER.debug('status %s', modems.get('status'))
         _LOGGER.debug("responce - modems=%s",modems)
@@ -58,7 +65,7 @@ class WaviotApi:
                         self._registrators[reg_key]['last_value'] = last_values[reg_key]['value']
                         self._registrators[reg_key]['last_value_timestamp'] = last_values[reg_key]['timestamp']
                         self._registrators[reg_key]['last_value_date'] = datetime.fromtimestamp(self._registrators[reg_key]['last_value_timestamp'])
-
+                        self._last_date_timestamp = last_values[reg_key]['timestamp']
 
     #async def _upd_last_val_registrators():
       #      ...

@@ -1,13 +1,15 @@
 # coordinator.py - Fetches WAVIoT modem data for the last 3 months
 #import aiohttp
 from datetime import datetime, timedelta, timezone
+#import datetime
 import logging
+#from datetime import timedelta
 
 import async_timeout
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 #from homeassistant.exceptions import ConfigEntryAuthFailed
-#from homeassistant.helpers import config_validation as cv
+from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator #, UpdateFailed
 
@@ -24,13 +26,13 @@ class WaviotDataUpdateCoordinator(DataUpdateCoordinator):
         self.hass = hass
         self.api_key = entry.data[const.CONF_API_KEY]
         #self.modem_id = entry.data[const.CONF_MODEM_ID]
-        self.modem_id='123'
-        self.data = {}
+        #self.modem_id='123'
+        #self.data = {}
         super().__init__(
             hass,
             _LOGGER,
-            name=f"WAVIoT Modem {self.modem_id}",
-            update_interval=timedelta(seconds=const.UPDATE_INTERVAL),
+            name=f"WAVIoT",
+            update_interval= const.DEFAULT_UPDATE_INTERVAL,
         )
 
         self.api = waviot_api.WaviotApi(
@@ -38,6 +40,8 @@ class WaviotDataUpdateCoordinator(DataUpdateCoordinator):
                 async_get_clientsession(hass), self.api_key
             )
         )
+        if const.CONF_UPDATE_INTERVAL in entry.options:
+            self.update_interval = cv.time_period( entry.options[const.CONF_UPDATE_INTERVAL])
 
     async def _async_update_data(self):
         await self._fetch()
@@ -46,23 +50,23 @@ class WaviotDataUpdateCoordinator(DataUpdateCoordinator):
        async with async_timeout.timeout(60):
              await self.api.async_fetch_all()
 
-    def _compute_latest(self):
-        """Compute only the latest reading value."""
-        if self.data is None:
-            self.data = {}
+    #def _compute_latest(self):
+    #    """Compute only the latest reading value."""
+    #    if self.data is None:
+    #        self.data = {}
 
-        readings = self.data.get("readings", [])
-        if not readings:
-            _LOGGER.debug("No readings available to compute latest value.")
-            self._init_empty_data()
-            return
+    #   readings = self.data.get("readings", [])
+    #    if not readings:
+    #        _LOGGER.debug("No readings available to compute latest value.")
+    #        self._init_empty_data()
+    #        return
 
-        latest_timestamp, latest_value = readings[-1]
-        latest_dt = datetime.fromtimestamp(latest_timestamp, tz=timezone.utc)
-        self.data["latest"] = latest_value
-        self.data["last_update"] = latest_dt
+    #    latest_timestamp, latest_value = readings[-1]
+    #    latest_dt = datetime.fromtimestamp(latest_timestamp, tz=timezone.utc)
+    #    self.data["latest"] = latest_value
+    #    self.data["last_update"] = latest_dt
 
-        _LOGGER.debug("Latest reading computed: %s at %s", latest_value, latest_dt)
+    #    _LOGGER.debug("Latest reading computed: %s at %s", latest_value, latest_dt)
 
     def _init_empty_data(self):
         """Initialize empty data dict."""
