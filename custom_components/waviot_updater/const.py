@@ -6,7 +6,7 @@ DOMAIN = "waviot_updater"
 CONF_API_KEY: Final[str] = "api_key"
 
 CONF_MODEM_ID = "modem_id"
-#UPDATE_INTERVAL = 1200  # 20 minutes
+##UPDATE_INTERVAL = 1200  # 20 minutes
 DEFAULT_UPDATE_INTERVAL: Final = datetime.timedelta(minutes=20)
 BASE_URL: Final = "https://lk.waviot.ru"
 API_URL: Final = f"{BASE_URL}/api."
