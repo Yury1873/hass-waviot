@@ -293,16 +293,45 @@ class WaviotBalanceMonetarySensor_v2(_WaviotBaseSensor):
                     balance_attr[key] = val
             self._attr_extra_state_attributes = balance_attr
 
+        def get_tariff(self, indx: int) -> float:
+            match indx:
+                case 1:
+                    if const.CONF_POWER_TARRIFF_1 in self.coordinator.config_entry.options:
+                        return self.coordinator.config_entry.options[const.CONF_POWER_TARRIFF_1]
+                    else:
+                        return 0.0
+                case 2:
+                    if const.CONF_POWER_TARRIFF_2 in self.coordinator.config_entry.options:
+                        return self.coordinator.config_entry.options[const.CONF_POWER_TARRIFF_2]
+                    else:
+                        return 0.0
+                case 3:
+                    if const.CONF_POWER_TARRIFF_3 in self.coordinator.config_entry.options:
+                        return self.coordinator.config_entry.options[const.CONF_POWER_TARRIFF_3]
+                    else:
+                        return 0.0
+                case 4:
+                    if const.CONF_POWER_TARRIFF_4 in self.coordinator.config_entry.options:
+                        return self.coordinator.config_entry.options[const.CONF_POWER_TARRIFF_4]
+                    else:
+                        return 0.0
+
+            return 0,0
+
         @property
         def native_value(self) -> float:
             """Return the value of the sensor."""
-            balance = 0.0
-            tariff = 0.0
+            ret_val = 0.0
             if self._balance_dict_key in self._reg_data:
-                balance = self._reg_data[self._balance_dict_key]['diff']
-            if 'tariff' in self._reg_data:
-                tariff = self._reg_data['tariff']
-            return balance * tariff
+                if self._reg_data['tariff_id']==0:
+                    for k,v in self._reg_data[self._balance_dict_key].items():
+                        if isinstance(v, dict) and not (k == 0):
+                            ret_val = ret_val + v['diff']*self.get_tariff(k)
+                else:
+                    ret_val = self._reg_data[self._balance_dict_key]['diff']*self.get_tariff(self._reg_data['tariff_id'])
+           # if 'tariff' in self._reg_data:
+           #     tariff = self._reg_data['tariff']
+            return ret_val
 
         @property
         def assumed_state(self) -> bool:
