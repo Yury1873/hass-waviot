@@ -141,37 +141,36 @@ class WaviotClient:
         ret: dict[my_types.Registrator_key, dict] = {}
         for item in data['registrators'].values():
             if item.get('active') :
-               # print("\n\n",item)
                 val: list = item.get('values')
                 if val is not None:
                     reg_key: my_types.Registrator_key = my_types.Registrator_key(modem_id = modem_id, channel_id=item.get('channel'))
                     ret[reg_key] = val[-1]
-                #    print(f"name: {item.get('channel')}")
-                #    print(f"values: {val[-1]}")
         return ret
 
     async def async_balances(self, timestamp_from: int, timestamp_to: int ) -> Dict:
         #https://lk.waviot.ru/api.data/get_balance_info/?from=1763627460&to=1763627460&elementId=1793084
-        _LOGGER.debug("get balance daily")
+        _LOGGER.debug("get balance daily ")
         #now = datetime.now()
-        match type:
-            case 'daily':
-                start_of_day = datetime.combine(datetime.now().date(), time.min)
-                timestamp_from = int(start_of_day.timestamp())
-                timestamp_to = timestamp_from + (60*60*24)
+        #match type:
+         #   case 'daily':
+         #       start_of_day = datetime.combine(datetime.now().date(), time.min)
+         #       timestamp_from = int(start_of_day.timestamp())
+         #       timestamp_to = timestamp_from + (60*60*24)
            # case 'weekly':
 
-            case 'monthly':
-                start_of_month = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-                timestamp_from = int(start_of_month.timestamp())
-                timestamp_to = int(datetime.now().timestamp())
+         #   case 'monthly':
+         #       start_of_month = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+         #       timestamp_from = int(start_of_month.timestamp())
+         #       timestamp_to = int(datetime.now().timestamp())
         params = {
             "elementId": await self._async_get_element_id(),
             "from": timestamp_from,
             "to": timestamp_to
         }
+        _LOGGER.debug(f"async_balances params {params}")
         data = await self._async_get(f"data/get_balance_info/", params)
         #####+++ Добавить обработчик ошибок
+        _LOGGER.debug(f"async_balances resp {data}")
         return data
 
     async def get_settlement_name(self) -> str:
