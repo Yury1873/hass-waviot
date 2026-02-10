@@ -134,41 +134,21 @@ class WaviotApi:
                                 output_dict[reg_key]['locality_name'] = data_raw['balance']['element_name']
                                 output_dict[reg_key]['last_message_date'] = datetime.fromtimestamp(
                                 val['last_message_timestamp'])
-
                                 output_dict[reg_key]['from'] = datetime.fromtimestamp(timestamp_from)
                                 output_dict[reg_key]['to'] = datetime.fromtimestamp(timestamp_to)
 
                                 tariff_id = self._registrators[reg_key]['tariff_id']
                                 self._registrators[reg_key][balance_type] = {}
-                                #balances[tariff_id]={}
                                 for k in ['start', 'end', 'diff']:
                                     self._registrators[reg_key][balance_type][k] = round(val[k], 2)
-                                   # balances[tariff_id][k]= round(val[k],2)
+                                    if tariff_id not in balances:
+                                        balances[tariff_id]={}
+                                    balances[tariff_id][k]= round(val[k],2)
                                 #если это сумма тарифов тогда добавляем инфо по входящим в сумму тарифам
                                 if tariff_id == 0:
                                     _LOGGER.debug(f"balances ={balances}")
-                                    #for t_id, v in balances.items():
-                                     #   self._registrators[reg_key][balance_type][t_id]=v
-                                        #self._registrators[reg_key][balance_type][t_id]['diff']= v
-
-                                #match ch_id:
-                                #    case "electro_ac_p_lsum_t1":
-                                #        balance_t1 = round(val['diff'],2)
-                                #    case "electro_ac_p_lsum_t2":
-                                #        balance_t2 = round(val['diff'],2)
-                                #    case "electro_ac_p_lsum_t3":
-                                #        balance_t3 = round(val['diff'],2)
-                                #    case "electro_ac_p_lsum_t4":
-                                #        balance_t4 = round(val['diff'],2)
-                                #    case "electro_ac_p_lsum_tsum":
-                                 #       output_dict[reg_key]['balance_t1'] = balance_t1
-                                 #       output_dict[reg_key]['balance_t2'] = balance_t2
-                                #        if self.registrator_is_active(my_types.Registrator_key(modem_id,"electro_ac_p_lsum_t3")):
-                                #            output_dict[reg_key]['balance_t3'] = balance_t3
-                                #            self._registrators[reg_key]['balance_t4'] = balance_t3
-                                #        if self.registrator_is_active(my_types.Registrator_key(modem_id,"electro_ac_p_lsum_t4")):
-                                #            output_dict[reg_key]['balance_t4'] = balance_t4
-
+                                    for t_id, v in balances.items():
+                                        self._registrators[reg_key][balance_type][t_id]=v
             return
 
         _LOGGER.debug("_daily_balance")
