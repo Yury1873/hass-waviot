@@ -4,3 +4,5 @@
 /config
 /hass
 /venv
+/tst_balance_date.py
+/tst_regExp.py
