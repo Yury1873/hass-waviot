@@ -7,12 +7,12 @@
 ---
 ## ✨ Возможности
 -  **Сенсор текущих показаний в разрезе действующих тарифов абонента**
-- ️ **Сенсор суточного баланса и с начала месяца (в kWh и в денежном выражении) **
+- ️ **Сенсор суточного баланса и с начала месяца (в kWh и в денежном выражении)**
 -  **Конфигурирование текущих тарифов абонента**
-  -  Автоматические обновление показаний
-  -  Данные получаются напрямую из API WAVIoT
-- ⚙️ Полная конфигурация через UI
-- 🧩 Совместима с HACS (пользовательское хранилище)
+-  Автоматические обновление показаний, c возможностью задать интервал опроса
+-  Данные получаются напрямую из API WAVIoT
+-  Полная конфигурация через UI
+-  Совместима с HACS (пользовательское хранилище)
 ---
 ## 🧰 Установка
 ### Метод 1: HACS (Рекомендуется)
@@ -98,13 +98,11 @@ After installing and restarting:
 2. Search for **WAVIoT Updater**
 3. Enter:
 - **API Key** (from your WAVIoT account)
-- **Modem ID** (e.g. `86145D`)
-4. Done! The integration will create the following sensors:
+4. The integration will create the following sensors:
 | Entity ID | Description | Unit |
 |-----------|-------------|------|
-| `sensor.waviot_<modem_id>_energy_total` | Total accumulated energy (T1) | kWh |
-| `sensor.waviot_<modem_id>_battery` | Battery level | % |
-| `sensor.waviot_<modem_id>_temperature` | Device temperature | °C |
+| `sensor.waviot_<modem_id>_<OBIS>_energy_total` | Total accumulated energy (T1) | kWh |
+  ....
 ---
 ## 🔄 Data Source
 All data is fetched from:
@@ -126,7 +124,7 @@ using your **API key** and **modem ID**.
 ## 🧑‍💻 Developer
 **Author:** [Yury1873](https://github.com/Yury1873)
 **License:** [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-**Repository:** [hass-waviot](https://github.com/soulripper13/hass-waviot)
+**Repository:** [hass-waviot](https://github.com/yury1873/hass-waviot)
 ---
 ## 🩵 Support
 If you find this integration helpful, please ⭐️ the repo or [open an issue](https://github.com/Yury1873/hass-waviot/issues) for suggestions and bug reports.
