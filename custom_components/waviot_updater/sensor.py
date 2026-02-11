@@ -123,6 +123,7 @@ class WaviotRegistratorSensor(_WaviotBaseSensor):
         self._attr_device_class = sensor.SensorDeviceClass.ENERGY
         self._attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
         self._attr_name = f'Показания "{self._registrator_raw["tariff_name"]}"'
+
         self._attr_extra_state_attributes = self._registrator_raw
 
     @property
@@ -235,20 +236,7 @@ class WaviotBalanceMonetarySensor_v2(_WaviotBaseSensor):
                 channel_id=self._reg_data['channel_id']
             )
             self._balance_dict_key =f"balance_{balance_type}"
-            self._reg_data['tariff'] = 0.0
-            match self._reg_data['tariff_id']:
-                case 1:
-                    if const.CONF_POWER_TARRIFF_1 in self.coordinator.config_entry.options:
-                        self._reg_data['tariff'] = self.coordinator.config_entry.options[const.CONF_POWER_TARRIFF_1]
-                case 2:
-                    if const.CONF_POWER_TARRIFF_2 in self.coordinator.config_entry.options:
-                        self._reg_data['tariff'] = self.coordinator.config_entry.options[const.CONF_POWER_TARRIFF_2]
-                case 3:
-                    if const.CONF_POWER_TARRIFF_3 in self.coordinator.config_entry.options:
-                        self._reg_data['tariff'] = self.coordinator.config_entry.options[const.CONF_POWER_TARRIFF_3]
-                case 4:
-                    if const.CONF_POWER_TARRIFF_4 in self.coordinator.config_entry.options:
-                        self._reg_data['tariff'] = self.coordinator.config_entry.options[const.CONF_POWER_TARRIFF_4]
+            self._reg_data['tariff']=self.get_tariff(self._reg_data['tariff_id'])
             self._update_state_attributes()
 
         @callback
@@ -256,7 +244,6 @@ class WaviotBalanceMonetarySensor_v2(_WaviotBaseSensor):
             """Handle data update."""
 #            self.balance = self.coordinator.api.get_registrator_balance(self._registrator_key, self._balance_type)
             self._reg_data = self.coordinator.api.get_registrator_raw(self._registrator_key)
-            self._reg_data['tariff'] = 0.0
             self._reg_data['tariff']=self.get_tariff(self._reg_data['tariff_id'])
             self._update_state_attributes()
             self.coordinator.last_update_success = True
