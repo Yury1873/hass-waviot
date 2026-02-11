@@ -55,7 +55,7 @@ https://lk.waviot.ru/api**
 - Убедитесь, что ваш API-ключ действителен для вашего аккаунта WAVIoT.
 ---
 ## 🧑‍💻 Разработчик
-**Автор:** [soulripper13](https://github.com/yury1873)
+**Автор:** [yury1873](https://github.com/yury1873)
 **Лицензия:** [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 **Репозиторий:** [hass-waviot](https://github.com/yury1873/hass-waviot)
 ---
