@@ -30,18 +30,11 @@ async def async_setup_entry(
         _LOGGER.debug('registrator_raw: %s', registrator_raw)
         sensors.append( WaviotRegistratorSensor( coord,  registrator_raw))
         ## дневные балансы ##
+        sensors.append( WaviotBalanceSensor_v2 ( coord, registrator_raw, balance_type='daily'))
         sensors.append( WaviotBalanceMonetarySensor_v2 ( coord, registrator_raw, balance_type='daily'))
         ## месячные балансы ##
+        sensors.append( WaviotBalanceSensor_v2 ( coord, registrator_raw, balance_type='monthly'))
         sensors.append( WaviotBalanceMonetarySensor_v2 ( coord, registrator_raw, balance_type='monthly'))
-
-    for vl in coord.api.get_balances(balance_type='daily').values():
-        _LOGGER.debug('daily_balances_raw: %s', vl)
-        sensors.append( WaviotBalanceSensor( coord,  balance_data=vl, balance_type='daily'))
-
-    for vl in coord.api.get_balances(balance_type='monthly').values():
-        _LOGGER.debug('monthly_balances_raw: %s', vl)
-        sensors.append( WaviotBalanceSensor( coord,  balance_data=vl, balance_type='monthly'))
-
     async_add_entities( sensors)
 
 ################################
@@ -143,68 +136,95 @@ class WaviotRegistratorSensor(_WaviotBaseSensor):
     #    return f"{self._registrator_raw.last_value}"
 
 ################################
-class WaviotBalanceSensor(_WaviotBaseSensor):
-    _attr_state_class = sensor.SensorStateClass.TOTAL_INCREASING
-    _attr_device_class = sensor.SensorDeviceClass.ENERGY
-    _attr_has_entity_name = True
-    _attr_translation_key = "meter"
+class WaviotBalanceSensor_v2(_WaviotBaseSensor):
+        # _attr_state_class = sensor.SensorStateClass.TOTAL_INCREASING
+        _attr_state_class = sensor.SensorStateClass.TOTAL
+        _attr_device_class = sensor.SensorDeviceClass.ENERGY
+        _attr_native_unit_of_measurement = "kWh"
+        _attr_has_entity_name = True
+        _attr_translation_key = "meter"
 
+        def __init__(
+                self,
+                coordinator: WaviotDataUpdateCoordinator,
+                registrator_data: dict[str, any],
+                balance_type: my_types.BALANCE_TYPES,
+                uniq_id=None
+        ):
+            if uniq_id is None:
+                uniq_id=f"waviot_{registrator_data['serial']}_{registrator_data['obis']}_blns_{balance_type}",
+            super().__init__(
+                coordinator=coordinator,
+                unique_id=uniq_id,
+                name=registrator_data['locality_name'],
+                model=f"modem ID: {registrator_data['modem_id']}"
+            )
+            #self.last_reset = None
+            self._reg_data: dict[str, any] = registrator_data
+            self._balance_type: my_types.BALANCE_TYPES = balance_type
+            self._registrator_key: my_types.Registrator_key = my_types.Registrator_key(
+                modem_id=self._reg_data['modem_id'],
+                channel_id=self._reg_data['channel_id']
+            )
+            self._balance_dict_key =f"balance_{balance_type}"
+            self._reg_data['tariff']=self.get_tariff(self._reg_data['tariff_id'])
+            self._update_state_attributes()
 
-    def __init__(
-        self,
-        coordinator: WaviotDataUpdateCoordinator,
-        balance_data: Dict[str, Any],
-        balance_type: my_types.BALANCE_TYPES,
-    ):
-        super().__init__(
-            coordinator = coordinator,
-            unique_id = f"waviot_{balance_data['serial']}_{self.validate_obis(balance_data['obis'])}_balance_{balance_type}",
-            name = balance_data['locality_name'],
-            model = f"modem ID: {balance_data['modem_id']}"
-        )
-        self._attr_native_unit_of_measurement = UnitOfEnergy.KILO_WATT_HOUR
-        self.balance = balance_data
-        self._balance_type: my_types.BALANCE_TYPES  = balance_type
-        self._registrator_key: my_types.Registrator_key = my_types.Registrator_key(
-                                                                        modem_id=balance_data['modem_id'],
-                                                                        channel_id=balance_data['channel_id']
-                                                            )
-        self._update_state_attributes()
+        @callback
+        def _handle_coordinator_update(self) -> None:
+            """Handle data update."""
+#            self.balance = self.coordinator.api.get_registrator_balance(self._registrator_key, self._balance_type)
+            self._reg_data = self.coordinator.api.get_registrator_raw(self._registrator_key)
+            self._reg_data['tariff']=self.get_tariff(self._reg_data['tariff_id'])
+            self._update_state_attributes()
+            self.coordinator.last_update_success = True
+            super()._handle_coordinator_update()
 
-    @callback
-    def _handle_coordinator_update(self) -> None:
-        """Handle data update."""
-        _LOGGER.debug("_handle_coordinator_update WaviotBalanceSensor")
-        self.balance = self.coordinator.api.get_registrator_balance(self._registrator_key,self._balance_type)
-        self.coordinator.last_update_success = True
-        super()._handle_coordinator_update()
+        def _update_state_attributes(self):
+            _LOGGER.debug(" _update_state_attributes WaviotBalanceMonetarySensor")
+            match self._balance_type:
+                case "daily":
+                    self._attr_name = f'Cутки, "{self._reg_data['tariff_name']}"'
+                case "weekly":
+                    self._attr_name = f'Неделя,  "{self._reg_data['tariff_name']}"'
+                case "monthly":
+                    self._attr_name = f'Mесяц, "{self._reg_data['tariff_name']}"'
+            balance_attr: dict = {}
+            balance_attr['obis'] = self._reg_data['obis']
+            balance_attr['tariff'] = self._reg_data['tariff']
+            if self._balance_dict_key in self._reg_data:
+                for key, val in self._reg_data[self._balance_dict_key].items():
+                    balance_attr[key] = val
+            self._attr_extra_state_attributes = balance_attr
 
-    def _update_state_attributes(self):
-        _LOGGER.debug(" _update_state_attributes WaviotBalanceSensor")
-        match self._balance_type:
-            case "daily":
-                self._attr_name = f'Текущие сутки, "{self.balance['tariff_name']}"'
-            case "weekly":
-                self._attr_name = f'Текущая неделя, "{self.balance['tariff_name']}"'
-            case "monthly":
-                self._attr_name = f'Текущий месяц, "{self.balance['tariff_name']}"'
-        self._attr_extra_state_attributes = self.balance
+        def get_tariff(self, indx: int) -> float:
+            if (indx < 1) and (indx > 5):
+                return 0.0
+            tariff_key=const.CONF_TARIFFS_KEYS[indx-1]
+            _LOGGER.debug(f"tariff_key: {tariff_key}")
+            if tariff_key in self.coordinator.config_entry.options:
+                _LOGGER.debug(f"tariff_key=: {self.coordinator.config_entry.options[tariff_key]}")
+                return self.coordinator.config_entry.options[tariff_key]
+            else:
+                return 0.0
 
-    @property
-    def native_value(self) -> float:
-        """Return the value of the sensor."""
-        return self.balance["diff"]
+        @property
+        def native_value(self) -> float:
+            """Return the value of the sensor."""
+            ret_val = self._reg_data[self._balance_dict_key]['diff']
+            return ret_val
 
-    @property
-    def assumed_state(self) -> bool:
-        return not self.coordinator.last_update_success
+        @property
+        def assumed_state(self) -> bool:
+            return not self.coordinator.last_update_success
 
-    @property
-    def available(self) -> bool:
-        return True
+        @property
+        def available(self) -> bool:
+            return True
 
-    #def __str__(self):
-    #    return f"{self.balance.last_value}"
+        # def __str__(self):
+        #    return f"{self.balance.last_value}"
+
 ################################
 class WaviotBalanceMonetarySensor_v2(_WaviotBaseSensor):
         # _attr_state_class = sensor.SensorStateClass.TOTAL_INCREASING

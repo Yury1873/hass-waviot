@@ -24,8 +24,8 @@ class WaviotApi:
         _LOGGER.debug("Initialize, api_key %s", client._api_key)
         self.client = client
         self._registrators: Dict[my_types.Registrator_key, Dict] = {}
-        self._balances_daily: Dict[my_types.Registrator_key, Dict] = {}
-        self._balances_monthly: Dict[my_types.Registrator_key, Dict] = {}
+        #self._balances_daily: Dict[my_types.Registrator_key, Dict] = {}
+        #self._balances_monthly: Dict[my_types.Registrator_key, Dict] = {}
         self._last_date_timestamp: int = 0
     @property
     async def settlement_name(self) -> str:
@@ -72,18 +72,16 @@ class WaviotApi:
                         self._registrators[reg_key]['active'] = True
                         self._registrators[reg_key]['locality_name'] = m['tree_name']
                         self._registrators[reg_key]['modem_id'] = m['modem_id']
-                        obis_str = self.validate_obis(self._registrators[reg_key]['obis'])
-                        obis_int = int(obis_str, 16)
-                        self._registrators[reg_key]['obis'] = obis_str
-                        self._registrators[reg_key]['obis_int'] = obis_int
+                        #obis_str = self.validate_obis(self._registrators[reg_key]['obis'])
+                        #obis_str = self._registrators[reg_key]['obis']
+                        #obis_int = int(self._registrators[reg_key]['obis'], 16)
+                        #self._registrators[reg_key]['obis'] = obis_str
+                        self._registrators[reg_key]['obis_int'] = int(self._registrators[reg_key]['obis'], 16)
                         self._registrators[reg_key]['last_value'] = last_values[reg_key]['value']
                         self._registrators[reg_key]['last_value_timestamp'] = last_values[reg_key]['timestamp']
                         self._registrators[reg_key]['last_value_date'] = datetime.fromtimestamp(self._registrators[reg_key]['last_value_timestamp'])
-                        #self._registrators[reg_key]['tst']={'1':1,'2':2,'3':3,'0':{'t1':7.5,'diff': 30}}
                         self._last_date_timestamp = last_values[reg_key]['timestamp']
 
-    #async def _upd_last_val_registrators():
-      #      ...
 
     def get_registrator_raw( self, key: my_types.Registrator_key) -> Dict[my_types.Registrator_key,Any]:
         #with _lock_registrators:
@@ -102,11 +100,8 @@ class WaviotApi:
         return False
 
     async def _fetch_balances(self):
-        def _extract_balances(data_raw: Dict, output_dict: Dict,balance_type: str):
-            balance_t1 = 0.0
-            balance_t2 = 0.0
-            balance_t3 = 0.0
-            balance_t4 = 0.0
+        #def _extract_balances(data_raw: Dict, output_dict: Dict,balance_type: str):
+        def _extract_balances(data_raw: Dict, balance_type: str):
             balances: dict[int, dict] = {}
             for ch_id, b in data_raw['balance'].items():
                 if  (isinstance(b, dict)) and (ch_id in [
@@ -121,21 +116,21 @@ class WaviotApi:
                                 reg_key = my_types.Registrator_key(modem_id=modem_id, channel_id=ch_id)
                                 if (not reg_key in self._registrators) or (self._registrators[reg_key]['active']==False):
                                     continue
-                                output_dict[reg_key] = {**val, **const.CHANELS_LIST[ch_id]}
+                                #output_dict[reg_key] = {**val, **const.CHANELS_LIST[ch_id]}
                                 #при переходе суток/месяца, сервер возвращает баланс за весь период измерений а не за запрашиваемый период
                                 #охоже это происходит когда еще нет расчитанного баланса по запрашиваемому периоду
                                 #соотв. банально обнуляем баланс чтобы не искажать реальность....
                                 if val['start'] == 0:
                                     val['start'] = val['end']
                                     val['diff'] = 0
-                                output_dict[reg_key]['start'] = round(val['start'],2)
-                                output_dict[reg_key]['end'] = round(val['end'],2)
-                                output_dict[reg_key]['diff'] = round(val['diff'],2)
-                                output_dict[reg_key]['locality_name'] = data_raw['balance']['element_name']
-                                output_dict[reg_key]['last_message_date'] = datetime.fromtimestamp(
-                                val['last_message_timestamp'])
-                                output_dict[reg_key]['from'] = datetime.fromtimestamp(timestamp_from)
-                                output_dict[reg_key]['to'] = datetime.fromtimestamp(timestamp_to)
+                                #output_dict[reg_key]['start'] = round(val['start'],2)
+                                #output_dict[reg_key]['end'] = round(val['end'],2)
+                                #output_dict[reg_key]['diff'] = round(val['diff'],2)
+                                #output_dict[reg_key]['locality_name'] = data_raw['balance']['element_name']
+                                #output_dict[reg_key]['last_message_date'] = datetime.fromtimestamp(
+                                #val['last_message_timestamp'])
+                                #output_dict[reg_key]['from'] = datetime.fromtimestamp(timestamp_from)
+                                #output_dict[reg_key]['to'] = datetime.fromtimestamp(timestamp_to)
 
                                 tariff_id = self._registrators[reg_key]['tariff_id']
                                 self._registrators[reg_key][balance_type] = {}
@@ -158,7 +153,8 @@ class WaviotApi:
         timestamp_to = timestamp_from + (60*60*24)
         balances = await self.client.async_balances(timestamp_from, timestamp_to)
         #async with _lock_balances_daily:
-        _extract_balances(balances, self._balances_daily,'balance_daily')
+        #_extract_balances(balances, self._balances_daily,'balance_daily')
+        _extract_balances(balances,'balance_daily')
         _LOGGER.debug("resp _monthly_balances: %s", balances)
         # monthly balance
         start_of_month = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
@@ -166,24 +162,24 @@ class WaviotApi:
         timestamp_to = int(datetime.now().timestamp())
         balances = await self.client.async_balances(timestamp_from, timestamp_to)
         #async with _lock_balances_monthly:
-        _extract_balances(balances, self._balances_monthly,'balance_monthly')
+        _extract_balances(balances,'balance_monthly')
 
-    def get_balances(self, balance_type: my_types.BALANCE_TYPES ) -> Dict[my_types.Registrator_key,Dict]:
-        match balance_type:
-            case 'daily':
-                # with _lock_balances_daily:
-                    return self._balances_daily.copy()
-            case 'monthly':
-               # with _lock_balances_monthly:
-                    return self._balances_monthly.copy()
-        return {}
+#    def get_balances(self, balance_type: my_types.BALANCE_TYPES ) -> Dict[my_types.Registrator_key,Dict]:
+#        match balance_type:
+#            case 'daily':
+#                # with _lock_balances_daily:
+#                    return self._balances_daily.copy()
+#            case 'monthly':
+#               # with _lock_balances_monthly:
+#                    return self._balances_monthly.copy()
+#        return {}
 
-    def get_registrator_balance(self, key: my_types.Registrator_key, balance_type: my_types.BALANCE_TYPES) -> Dict:
-        match balance_type:
-            case 'daily':
-               # with _lock_balances_daily:
-                    return self._balances_daily[key].copy()
-            case 'monthly':
-               # with _lock_balances_monthly:
-                    return self._balances_monthly[key].copy()
-        return {}
+#    def get_registrator_balance(self, key: my_types.Registrator_key, balance_type: my_types.BALANCE_TYPES) -> Dict:
+#        match balance_type:
+#            case 'daily':
+#               # with _lock_balances_daily:
+#                    return self._balances_daily[key].copy()
+#            case 'monthly':
+#               # with _lock_balances_monthly:
+#                    return self._balances_monthly[key].copy()
+#        return {}
