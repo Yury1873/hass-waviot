@@ -81,5 +81,5 @@ CONF_POWER_TARRIFF_1: Final = "Тариф \"День\", стоимость kW/h"
 CONF_POWER_TARRIFF_2: Final = "Тариф \"Ночь\", стоимость kW/h"
 CONF_POWER_TARRIFF_3: Final = "Тариф \"Мультипиковый\", стоимость kW/h"
 CONF_POWER_TARRIFF_4: Final = "Тариф \"Зональный\", стоимость kW/h"
-
+CONF_TARIFFS_KEYS: Final = (CONF_POWER_TARRIFF_1,CONF_POWER_TARRIFF_2,CONF_POWER_TARRIFF_3,CONF_POWER_TARRIFF_4)
 #CONF_DESC_POWER_TARRIFF_2: Final = "desc_power_tarriff_2"

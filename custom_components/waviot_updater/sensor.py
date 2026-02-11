@@ -42,7 +42,6 @@ async def async_setup_entry(
         _LOGGER.debug('monthly_balances_raw: %s', vl)
         sensors.append( WaviotBalanceSensor( coord,  balance_data=vl, balance_type='monthly'))
 
-
     async_add_entities( sensors)
 
 ################################
@@ -205,8 +204,7 @@ class WaviotBalanceSensor(_WaviotBaseSensor):
 
     #def __str__(self):
     #    return f"{self.balance.last_value}"
-    ################################
-        ################################
+################################
 class WaviotBalanceMonetarySensor_v2(_WaviotBaseSensor):
         # _attr_state_class = sensor.SensorStateClass.TOTAL_INCREASING
         _attr_state_class = sensor.SensorStateClass.TOTAL
@@ -259,19 +257,7 @@ class WaviotBalanceMonetarySensor_v2(_WaviotBaseSensor):
 #            self.balance = self.coordinator.api.get_registrator_balance(self._registrator_key, self._balance_type)
             self._reg_data = self.coordinator.api.get_registrator_raw(self._registrator_key)
             self._reg_data['tariff'] = 0.0
-            match self._reg_data['tariff_id']:
-                case 1:
-                    if const.CONF_POWER_TARRIFF_1 in self.coordinator.config_entry.options:
-                        self._reg_data['tariff'] = self.coordinator.config_entry.options[const.CONF_POWER_TARRIFF_1]
-                case 2:
-                    if const.CONF_POWER_TARRIFF_2 in self.coordinator.config_entry.options:
-                        self._reg_data['tariff'] = self.coordinator.config_entry.options[const.CONF_POWER_TARRIFF_2]
-                case 3:
-                    if const.CONF_POWER_TARRIFF_3 in self.coordinator.config_entry.options:
-                        self._reg_data['tariff'] = self.coordinator.config_entry.options[const.CONF_POWER_TARRIFF_3]
-                case 4:
-                    if const.CONF_POWER_TARRIFF_4 in self.coordinator.config_entry.options:
-                        self._reg_data['tariff'] = self.coordinator.config_entry.options[const.CONF_POWER_TARRIFF_4]
+            self._reg_data['tariff']=self.get_tariff(self._reg_data['tariff_id'])
             self._update_state_attributes()
             self.coordinator.last_update_success = True
             super()._handle_coordinator_update()
@@ -294,29 +280,15 @@ class WaviotBalanceMonetarySensor_v2(_WaviotBaseSensor):
             self._attr_extra_state_attributes = balance_attr
 
         def get_tariff(self, indx: int) -> float:
-            match indx:
-                case 1:
-                    if const.CONF_POWER_TARRIFF_1 in self.coordinator.config_entry.options:
-                        return self.coordinator.config_entry.options[const.CONF_POWER_TARRIFF_1]
-                    else:
-                        return 0.0
-                case 2:
-                    if const.CONF_POWER_TARRIFF_2 in self.coordinator.config_entry.options:
-                        return self.coordinator.config_entry.options[const.CONF_POWER_TARRIFF_2]
-                    else:
-                        return 0.0
-                case 3:
-                    if const.CONF_POWER_TARRIFF_3 in self.coordinator.config_entry.options:
-                        return self.coordinator.config_entry.options[const.CONF_POWER_TARRIFF_3]
-                    else:
-                        return 0.0
-                case 4:
-                    if const.CONF_POWER_TARRIFF_4 in self.coordinator.config_entry.options:
-                        return self.coordinator.config_entry.options[const.CONF_POWER_TARRIFF_4]
-                    else:
-                        return 0.0
-
-            return 0,0
+            if (indx < 1) and (indx > 5):
+                return 0.0
+            tariff_key=const.CONF_TARIFFS_KEYS[indx-1]
+            _LOGGER.debug(f"tariff_key: {tariff_key}")
+            if tariff_key in self.coordinator.config_entry.options:
+                _LOGGER.debug(f"tariff_key=: {self.coordinator.config_entry.options[tariff_key]}")
+                return self.coordinator.config_entry.options[tariff_key]
+            else:
+                return 0.0
 
         @property
         def native_value(self) -> float:
@@ -329,8 +301,6 @@ class WaviotBalanceMonetarySensor_v2(_WaviotBaseSensor):
                             ret_val = ret_val + v['diff']*self.get_tariff(k)
                 else:
                     ret_val = self._reg_data[self._balance_dict_key]['diff']*self.get_tariff(self._reg_data['tariff_id'])
-           # if 'tariff' in self._reg_data:
-           #     tariff = self._reg_data['tariff']
             return ret_val
 
         @property
@@ -340,3 +310,6 @@ class WaviotBalanceMonetarySensor_v2(_WaviotBaseSensor):
         @property
         def available(self) -> bool:
             return True
+
+        # def __str__(self):
+        #    return f"{self.balance.last_value}"
