@@ -1,28 +1,14 @@
 import json as jsonmod
 import logging
-from datetime import datetime, time
+from datetime import time
 import time
-#import datetime
-from typing import Final, List, Dict, TypedDict,  Optional
+from typing import Final, List, Dict,  Optional
 
 import aiohttp
 from homeassistant import exceptions
 from . import const,  my_types
 
 _LOGGER = logging.getLogger(__name__)
-
-LOGIN_TYPE_API_KEY: Final = "api_key"
-LOGIN_TYPE_EMAIL: Final = "email"
-
-class ProfileName(TypedDict):
-    first: str
-    last: str
-    patronymic: Optional[str]
-
-class Profile(TypedDict):
-    phone: str
-    email: str
-    name: ProfileName
 
 class WaviotClient:
     BASE_URL: Final = const.BASE_URL
@@ -34,7 +20,6 @@ class WaviotClient:
         self._session = session
         self.headers = None
         #self._element_id = ""
-
 
     @staticmethod
     async def _async_response_json(
@@ -130,14 +115,12 @@ class WaviotClient:
             "modem_id": modem_id,
             "from": f"{int(time.time())}",
         }
-        #url= f"{const.API_URL}data/get_full_element_info"
         url_sufix = "data/get_values/"
         url = f"{const.API_URL}{url_sufix}"
         _LOGGER.debug("get url: %s", url)
         data = await self._async_get(f"{url_sufix}",params)
         assert data.get('status') == "ok"
         _LOGGER.debug("resp: %s", data)
-        #item: dict = {}
         ret: dict[my_types.Registrator_key, dict] = {}
         for item in data['registrators'].values():
             if item.get('active') :
@@ -148,20 +131,7 @@ class WaviotClient:
         return ret
 
     async def async_balances(self, timestamp_from: int, timestamp_to: int ) -> Dict:
-        #https://lk.waviot.ru/api.data/get_balance_info/?from=1763627460&to=1763627460&elementId=1793084
         _LOGGER.debug("get balance daily ")
-        #now = datetime.now()
-        #match type:
-         #   case 'daily':
-         #       start_of_day = datetime.combine(datetime.now().date(), time.min)
-         #       timestamp_from = int(start_of_day.timestamp())
-         #       timestamp_to = timestamp_from + (60*60*24)
-           # case 'weekly':
-
-         #   case 'monthly':
-         #       start_of_month = datetime.now().replace(day=1, hour=0, minute=0, second=0, microsecond=0)
-         #       timestamp_from = int(start_of_month.timestamp())
-         #       timestamp_to = int(datetime.now().timestamp())
         params = {
             "elementId": await self._async_get_element_id(),
             "from": timestamp_from,
@@ -189,12 +159,6 @@ class WaviotClient:
         data = await self._async_get(f"tree/get_tree/")
         _LOGGER.debug(f"data {data}")
         return _get_setlement_recursion(data['tree'])
-
-
-    async def async_profile(self) -> Profile:
-        # return await self._async_get("/v3/profile")
-        #return await self._async_get("/v6/users/current")
-        ...
 
 class ClientError(exceptions.HomeAssistantError):
         def __init__(
