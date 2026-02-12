@@ -12,7 +12,6 @@ _LOGGER = logging.getLogger(__name__)
 #############################
 class WaviotApi:
     def __init__(self, client: waviot_client.WaviotClient) -> None:
-        _LOGGER.debug("Initialize, api_key %s", client._api_key)
         self.client = client
         self._registrators: Dict[my_types.Registrator_key, Dict] = {}
         self._last_date_timestamp: int = 0

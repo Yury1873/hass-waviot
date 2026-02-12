@@ -1,5 +1,4 @@
 import logging
-import datetime
 from typing import Final
 
 from homeassistant.config_entries import ConfigEntry

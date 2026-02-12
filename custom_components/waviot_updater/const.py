@@ -1,6 +1,5 @@
 import datetime
-#from enum import IntFlag
-from typing import Final, Literal
+from typing import Final
 
 DOMAIN = "waviot_updater"
 CONF_API_KEY: Final[str] = "api_key"

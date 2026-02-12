@@ -90,7 +90,6 @@ class WaviotRegistratorSensor(_WaviotBaseSensor):
         coordinator: WaviotDataUpdateCoordinator,
         #registrator: waviot_api.Registrator,
         registrator_raw: Dict[str, Any],
-        id_suffix: str = ''
     ):
         super().__init__(
             coordinator = coordinator,
@@ -147,7 +146,7 @@ class WaviotBalanceSensor_v2(_WaviotBaseSensor):
         def __init__(
                 self,
                 coordinator: WaviotDataUpdateCoordinator,
-                registrator_data: dict[str, any],
+                registrator_data: dict[str, Any],
                 balance_type: my_types.BALANCE_TYPES,
                 uniq_id=None
         ):
@@ -160,7 +159,7 @@ class WaviotBalanceSensor_v2(_WaviotBaseSensor):
                 model=f"modem ID: {registrator_data['modem_id']}"
             )
             #self.last_reset = None
-            self._reg_data: dict[str, any] = registrator_data
+            self._reg_data: dict[str, Any] = registrator_data
             self._balance_type: my_types.BALANCE_TYPES = balance_type
             self._registrator_key: my_types.Registrator_key = my_types.Registrator_key(
                 modem_id=self._reg_data['modem_id'],
@@ -237,7 +236,7 @@ class WaviotBalanceMonetarySensor_v2(_WaviotBaseSensor):
         def __init__(
                 self,
                 coordinator: WaviotDataUpdateCoordinator,
-                registrator_data: dict[str, any],
+                registrator_data: dict[str, Any],
                 balance_type: my_types.BALANCE_TYPES,
         ):
             super().__init__(
@@ -248,7 +247,7 @@ class WaviotBalanceMonetarySensor_v2(_WaviotBaseSensor):
                 model=f"modem ID: {registrator_data['modem_id']}"
             )
             #self.last_reset = None
-            self._reg_data: dict[str, any] = registrator_data
+            self._reg_data: dict[str, Any] = registrator_data
             #self.balance = balance_data
             self._balance_type: my_types.BALANCE_TYPES = balance_type
             self._registrator_key: my_types.Registrator_key = my_types.Registrator_key(
@@ -278,7 +277,7 @@ class WaviotBalanceMonetarySensor_v2(_WaviotBaseSensor):
                     self._attr_name = f'Неделя,  "{self._reg_data['tariff_name']}"'
                 case "monthly":
                     self._attr_name = f'Mесяц, "{self._reg_data['tariff_name']}"'
-            balance_attr: dict = {}
+            balance_attr = {}
             balance_attr['obis'] = self._reg_data['obis']
             balance_attr['tariff'] = self._reg_data['tariff']
             if self._balance_dict_key in self._reg_data:

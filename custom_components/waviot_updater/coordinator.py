@@ -1,21 +1,12 @@
-# coordinator.py - Fetches WAVIoT modem data for the last 3 months
-#import aiohttp
-from datetime import datetime, timedelta, timezone
-#import datetime
 import logging
-#from datetime import timedelta
-
 import async_timeout
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
-#from homeassistant.exceptions import ConfigEntryAuthFailed
 from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator #, UpdateFailed
 
-#from .const import UPDATE_INTERVAL, BASE_URL
 from . import const, waviot_client, waviot_api
-
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -25,9 +16,6 @@ class WaviotDataUpdateCoordinator(DataUpdateCoordinator):
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry):
         self.hass = hass
         self.api_key = entry.data[const.CONF_API_KEY]
-        #self.modem_id = entry.data[const.CONF_MODEM_ID]
-        #self.modem_id='123'
-        #self.data = {}
         super().__init__(
             hass,
             _LOGGER,
