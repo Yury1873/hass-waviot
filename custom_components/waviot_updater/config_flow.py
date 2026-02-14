@@ -18,7 +18,8 @@ from homeassistant.helpers.schema_config_entry_flow import (
 
 from . import const, waviot_api, waviot_client
 
-_API_KEY  = const.CONF_API_KEY
+#__KEY = Literal[const.CONF_API_KEY,]
+#_API_KEY: CONF_KEY = 'const.CONF_API_KEY'
 
 class WaviotFlowHandler(config_entries.ConfigFlow, domain=  const.DOMAIN):
     VERSION = 1
@@ -29,13 +30,13 @@ class WaviotFlowHandler(config_entries.ConfigFlow, domain=  const.DOMAIN):
     def api(self):
         if self._api is None:
             self._api = waviot_api.WaviotApi(
-                waviot_client.WaviotClient(async_get_clientsession(self.hass),self.context[_API_KEY] )
+                waviot_client.WaviotClient(async_get_clientsession(self.hass),self.context[const.CONF_API_KEY] )
             )
         return self._api
 
     async def async_step_user(self, user_input=None):
         if user_input is not None:
-            self.context[_API_KEY] = user_input[_API_KEY]
+            self.context[const.CONF_API_KEY] = user_input[const.CONF_API_KEY]
             return self.async_create_entry(title= await self.api.settlement_name, data=user_input)
 
         schema = vol.Schema({
@@ -82,14 +83,6 @@ async def general_options_schema(
             ): selector.DurationSelector(
                 selector.DurationSelectorConfig(enable_day=False),
             ),
-     #       vol.Optional(
-     #           const.CONF_RATES_SENSORS,
-     #           default=handler.options.get(const.CONF_RATES_SENSORS, True),
-     #       ): selector.BooleanSelector(selector.BooleanSelectorConfig()),
-     #       vol.Optional(
-     #           const.CONF_DIAGNOSTIC_SENSORS,
-     #           default=handler.options.get(const.CONF_DIAGNOSTIC_SENSORS, False),
-     #       ): selector.BooleanSelector(selector.BooleanSelectorConfig()),
             vol.Optional(
                 const.CONF_POWER_TARRIFF_1,
                 default=handler.options.get(const.CONF_POWER_TARRIFF_1, 0.0),

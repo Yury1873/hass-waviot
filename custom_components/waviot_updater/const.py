@@ -1,11 +1,27 @@
 import datetime
-from typing import Final
+from typing import Final,  Literal
 
 DOMAIN = "waviot_updater"
-CONF_API_KEY: Final[str] = "api_key"
+ConfigKey = Literal[
+    'api_key',
+    'update_interval',
+    'diagnostic_sensors',
+    'Тариф \"День\", стоимость kW/h',
+    'Тариф \"Ночь\", стоимость kW/h',
+    "Тариф \"Мультипиковый\", стоимость kW/h",
+    "Тариф \"Зональный\", стоимость kW/h"
+]
 
-CONF_MODEM_ID = "modem_id"
-##UPDATE_INTERVAL = 1200  # 20 minutes
+CONF_API_KEY: Final = "api_key"
+CONF_UPDATE_INTERVAL: ConfigKey = "update_interval"
+CONF_DIAGNOSTIC_SENSORS: ConfigKey  = 'diagnostic_sensors'
+CONF_POWER_TARRIFF_1: ConfigKey = "Тариф \"День\", цена kW/h"
+CONF_POWER_TARRIFF_2: ConfigKey = "Тариф \"Ночь\", цена kW/h"
+CONF_POWER_TARRIFF_3: ConfigKey = "Тариф \"Мультипиковый\", цена kW/h"
+CONF_POWER_TARRIFF_4: ConfigKey = "Тариф \"Зональный\", цена kW/h"
+
+CONF_TARIFFS_KEYS: Final = (CONF_POWER_TARRIFF_1,CONF_POWER_TARRIFF_2,CONF_POWER_TARRIFF_3,CONF_POWER_TARRIFF_4)
+
 DEFAULT_UPDATE_INTERVAL: Final = datetime.timedelta(minutes=20)
 BASE_URL: Final = "https://lk.waviot.ru"
 API_URL: Final = f"{BASE_URL}/api."
@@ -73,12 +89,4 @@ CHANELS_LIST: Final = {
 }
 
 
-CONF_UPDATE_INTERVAL: Final = "update_interval"
-CONF_DIAGNOSTIC_SENSORS: Final = "diagnostic_sensors"
-CONF_RATES_SENSORS: Final = "rates_sensors"
-CONF_POWER_TARRIFF_1: Final = "Тариф \"День\", стоимость kW/h"
-CONF_POWER_TARRIFF_2: Final = "Тариф \"Ночь\", стоимость kW/h"
-CONF_POWER_TARRIFF_3: Final = "Тариф \"Мультипиковый\", стоимость kW/h"
-CONF_POWER_TARRIFF_4: Final = "Тариф \"Зональный\", стоимость kW/h"
-CONF_TARIFFS_KEYS: Final = (CONF_POWER_TARRIFF_1,CONF_POWER_TARRIFF_2,CONF_POWER_TARRIFF_3,CONF_POWER_TARRIFF_4)
 #CONF_DESC_POWER_TARRIFF_2: Final = "desc_power_tarriff_2"

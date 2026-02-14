@@ -98,7 +98,7 @@ class WaviotApi:
                                 #при переходе суток/месяца, сервер возвращает баланс за весь период измерений а не за запрашиваемый период
                                 #охоже это происходит когда еще нет расчитанного баланса по запрашиваемому периоду
                                 #соотв. банально обнуляем баланс чтобы не искажать реальность....
-                                if val['start'] == 0:
+                                if (val['start'] == 0) or (val['diff'] < 0):
                                     val['start'] = val['end']
                                     val['diff'] = 0
 
@@ -106,14 +106,17 @@ class WaviotApi:
                                 self._registrators[reg_key][balance_type] = {}
                                 for k in ['start', 'end', 'diff']:
                                     self._registrators[reg_key][balance_type][k] = round(val[k], 2)
-                                    if tariff_id not in balances:
+                                    if tariff_id not in l_balances:
                                         l_balances[tariff_id]={}
+
                                     l_balances[tariff_id][k]= round(val[k],2)
                                 #если это сумма тарифов тогда добавляем инфо по входящим в сумму тарифам
                                 if tariff_id == 0:
-                                    _LOGGER.debug(f"balances ={balances}")
+                                    _LOGGER.debug(f"l_balances ={l_balances}")
                                     for t_id, v in l_balances.items():
                                         self._registrators[reg_key][balance_type][t_id]=v
+                                        #self._registrators[reg_key][balance_type][str(f"t{t_id}")] = v
+
             return
 
         _LOGGER.debug("_daily_balance")

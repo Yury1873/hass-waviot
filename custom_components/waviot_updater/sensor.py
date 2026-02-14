@@ -136,14 +136,14 @@ class WaviotRegistratorSensor(_WaviotBaseSensor):
 
 ################################
 class WaviotBalanceSensor_v2(_WaviotBaseSensor):
-        # _attr_state_class = sensor.SensorStateClass.TOTAL_INCREASING
-        _attr_state_class = sensor.SensorStateClass.TOTAL
-        _attr_device_class = sensor.SensorDeviceClass.ENERGY
-        _attr_native_unit_of_measurement = "kWh"
-        _attr_has_entity_name = True
-        _attr_translation_key = "meter"
+    # _attr_state_class = sensor.SensorStateClass.TOTAL_INCREASING
+    _attr_state_class = sensor.SensorStateClass.TOTAL
+    _attr_device_class = sensor.SensorDeviceClass.ENERGY
+    _attr_native_unit_of_measurement = "kWh"
+    _attr_has_entity_name = True
+    _attr_translation_key = "meter"
 
-        def __init__(
+    def __init__(
                 self,
                 coordinator: WaviotDataUpdateCoordinator,
                 registrator_data: dict[str, Any],
@@ -151,26 +151,27 @@ class WaviotBalanceSensor_v2(_WaviotBaseSensor):
                 uniq_id=None
         ):
             if uniq_id is None:
-                uniq_id=f"waviot_{registrator_data['serial']}_{registrator_data['obis']}_blns_{balance_type}",
+                uniq_id=f"waviot_{registrator_data['serial']}_{registrator_data['obis']}_blnс_{balance_type}",
             super().__init__(
                 coordinator=coordinator,
                 unique_id=uniq_id,
                 name=registrator_data['locality_name'],
                 model=f"modem ID: {registrator_data['modem_id']}"
             )
+
             #self.last_reset = None
             self._reg_data: dict[str, Any] = registrator_data
             self._balance_type: my_types.BALANCE_TYPES = balance_type
             self._registrator_key: my_types.Registrator_key = my_types.Registrator_key(
-                modem_id=self._reg_data['modem_id'],
-                channel_id=self._reg_data['channel_id']
+                modem_id = self._reg_data['modem_id'],
+                channel_id = self._reg_data['channel_id']
             )
-            self._balance_dict_key =f"balance_{balance_type}"
-            self._reg_data['tariff']=self.get_tariff(self._reg_data['tariff_id'])
+            self._balance_dict_key = f"balance_{balance_type}"
+            self._reg_data['tariff'] = self.get_tariff(self._reg_data['tariff_id'])
             self._update_state_attributes()
 
-        @callback
-        def _handle_coordinator_update(self) -> None:
+    @callback
+    def _handle_coordinator_update(self) -> None:
             """Handle data update."""
 #            self.balance = self.coordinator.api.get_registrator_balance(self._registrator_key, self._balance_type)
             self._reg_data = self.coordinator.api.get_registrator_raw(self._registrator_key)
@@ -179,7 +180,7 @@ class WaviotBalanceSensor_v2(_WaviotBaseSensor):
             self.coordinator.last_update_success = True
             super()._handle_coordinator_update()
 
-        def _update_state_attributes(self):
+    def _update_state_attributes(self):
             _LOGGER.debug(" _update_state_attributes WaviotBalanceMonetarySensor")
             match self._balance_type:
                 case "daily":
@@ -188,15 +189,20 @@ class WaviotBalanceSensor_v2(_WaviotBaseSensor):
                     self._attr_name = f'Неделя,  "{self._reg_data['tariff_name']}"'
                 case "monthly":
                     self._attr_name = f'Mесяц, "{self._reg_data['tariff_name']}"'
-            balance_attr: dict = {}
-            balance_attr['obis'] = self._reg_data['obis']
-            balance_attr['tariff'] = self._reg_data['tariff']
+            balance_attr = {
+                'obis':  self._reg_data['obis'],
+                'tariff': self._reg_data['tariff'],
+            }
             if self._balance_dict_key in self._reg_data:
+
                 for key, val in self._reg_data[self._balance_dict_key].items():
+                    _LOGGER.debug(f"init attr key: {key} value: {val} ")
                     balance_attr[key] = val
+
+            _LOGGER.debug(f"balance_attr: {balance_attr}")
             self._attr_extra_state_attributes = balance_attr
 
-        def get_tariff(self, indx: int) -> float:
+    def get_tariff(self, indx: int) -> float:
             if (indx < 1) and (indx > 5):
                 return 0.0
             tariff_key=const.CONF_TARIFFS_KEYS[indx-1]
@@ -207,18 +213,18 @@ class WaviotBalanceSensor_v2(_WaviotBaseSensor):
             else:
                 return 0.0
 
-        @property
-        def native_value(self) -> float:
+    @property
+    def native_value(self) -> float:
             """Return the value of the sensor."""
             ret_val = self._reg_data[self._balance_dict_key]['diff']
             return ret_val
 
-        @property
-        def assumed_state(self) -> bool:
+    @property
+    def assumed_state(self) -> bool:
             return not self.coordinator.last_update_success
 
-        @property
-        def available(self) -> bool:
+    @property
+    def available(self) -> bool:
             return True
 
         # def __str__(self):
@@ -226,14 +232,14 @@ class WaviotBalanceSensor_v2(_WaviotBaseSensor):
 
 ################################
 class WaviotBalanceMonetarySensor_v2(_WaviotBaseSensor):
-        # _attr_state_class = sensor.SensorStateClass.TOTAL_INCREASING
-        _attr_state_class = sensor.SensorStateClass.TOTAL
-        _attr_device_class = sensor.SensorDeviceClass.MONETARY
-        _attr_native_unit_of_measurement = "RUB"
-        _attr_has_entity_name = True
-        _attr_translation_key = "meter"
+    # _attr_state_class = sensor.SensorStateClass.TOTAL_INCREASING
+    _attr_state_class = sensor.SensorStateClass.TOTAL
+    _attr_device_class = sensor.SensorDeviceClass.MONETARY
+    _attr_native_unit_of_measurement = "RUB"
+    _attr_has_entity_name = True
+    _attr_translation_key = "meter"
 
-        def __init__(
+    def __init__(
                 self,
                 coordinator: WaviotDataUpdateCoordinator,
                 registrator_data: dict[str, Any],
@@ -242,11 +248,11 @@ class WaviotBalanceMonetarySensor_v2(_WaviotBaseSensor):
             super().__init__(
                 coordinator=coordinator,
                 # unique_id = f"{const.DOMAIN}_{balance_data['serial']}_{self.validate_obis(balance_data['obis'])}_{balance_type}_balance_money",
-                unique_id=f"waviot_{registrator_data['serial']}_{registrator_data['obis']}_mnt_bln_{balance_type}",
+                unique_id=f"waviot_{registrator_data['serial']}_{registrator_data['obis']}_mnt_blnc_{balance_type}",
                 name=registrator_data['locality_name'],
                 model=f"modem ID: {registrator_data['modem_id']}"
             )
-            #self.last_reset = None
+
             self._reg_data: dict[str, Any] = registrator_data
             #self.balance = balance_data
             self._balance_type: my_types.BALANCE_TYPES = balance_type
@@ -258,8 +264,8 @@ class WaviotBalanceMonetarySensor_v2(_WaviotBaseSensor):
             self._reg_data['tariff']=self.get_tariff(self._reg_data['tariff_id'])
             self._update_state_attributes()
 
-        @callback
-        def _handle_coordinator_update(self) -> None:
+    @callback
+    def _handle_coordinator_update(self) -> None:
             """Handle data update."""
 #            self.balance = self.coordinator.api.get_registrator_balance(self._registrator_key, self._balance_type)
             self._reg_data = self.coordinator.api.get_registrator_raw(self._registrator_key)
@@ -268,7 +274,7 @@ class WaviotBalanceMonetarySensor_v2(_WaviotBaseSensor):
             self.coordinator.last_update_success = True
             super()._handle_coordinator_update()
 
-        def _update_state_attributes(self):
+    def _update_state_attributes(self):
             _LOGGER.debug(" _update_state_attributes WaviotBalanceMonetarySensor")
             match self._balance_type:
                 case "daily":
@@ -277,15 +283,16 @@ class WaviotBalanceMonetarySensor_v2(_WaviotBaseSensor):
                     self._attr_name = f'Неделя,  "{self._reg_data['tariff_name']}"'
                 case "monthly":
                     self._attr_name = f'Mесяц, "{self._reg_data['tariff_name']}"'
-            balance_attr = {}
-            balance_attr['obis'] = self._reg_data['obis']
-            balance_attr['tariff'] = self._reg_data['tariff']
+            balance_attr = {
+                    'obis':  self._reg_data['obis'],
+                    'tariff':  self._reg_data['tariff'],
+            }
             if self._balance_dict_key in self._reg_data:
                 for key, val in self._reg_data[self._balance_dict_key].items():
                     balance_attr[key] = val
             self._attr_extra_state_attributes = balance_attr
 
-        def get_tariff(self, indx: int) -> float:
+    def get_tariff(self, indx: int) -> float:
             if (indx < 1) and (indx > 5):
                 return 0.0
             tariff_key=const.CONF_TARIFFS_KEYS[indx-1]
@@ -296,12 +303,12 @@ class WaviotBalanceMonetarySensor_v2(_WaviotBaseSensor):
             else:
                 return 0.0
 
-        @property
-        def native_value(self) -> float:
+    @property
+    def native_value(self) -> float:
             """Return the value of the sensor."""
             ret_val = 0.0
             if self._balance_dict_key in self._reg_data:
-                if self._reg_data['tariff_id']==0:
+                if self._reg_data['tariff_id']==0: #если сумма тарифов
                     for k,v in self._reg_data[self._balance_dict_key].items():
                         if isinstance(v, dict) and not (k == 0):
                             ret_val = ret_val + v['diff']*self.get_tariff(k)
@@ -309,12 +316,12 @@ class WaviotBalanceMonetarySensor_v2(_WaviotBaseSensor):
                     ret_val = self._reg_data[self._balance_dict_key]['diff']*self.get_tariff(self._reg_data['tariff_id'])
             return ret_val
 
-        @property
-        def assumed_state(self) -> bool:
+    @property
+    def assumed_state(self) -> bool:
             return not self.coordinator.last_update_success
 
-        @property
-        def available(self) -> bool:
+    @property
+    def available(self) -> bool:
             return True
 
         # def __str__(self):
