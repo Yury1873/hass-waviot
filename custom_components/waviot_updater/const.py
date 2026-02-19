@@ -6,19 +6,19 @@ ConfigKey = Literal[
     'api_key',
     'update_interval',
     'diagnostic_sensors',
-    'Тариф \"День\", стоимость kW/h',
-    'Тариф \"Ночь\", стоимость kW/h',
-    "Тариф \"Мультипиковый\", стоимость kW/h",
-    "Тариф \"Зональный\", стоимость kW/h"
+    'Тариф "День", стоимость kW/h',
+    'Тариф "Ночь", стоимость kW/h',
+    'Тариф "Мультипиковый", стоимость kW/h',
+    'Тариф "Зональный", стоимость kW/h'
 ]
 
-CONF_API_KEY: Final = "api_key"
+CONF_API_KEY: ConfigKey = 'api_key'
 CONF_UPDATE_INTERVAL: ConfigKey = "update_interval"
-CONF_DIAGNOSTIC_SENSORS: ConfigKey  = 'diagnostic_sensors'
-CONF_POWER_TARRIFF_1: ConfigKey = "Тариф \"День\", цена kW/h"
-CONF_POWER_TARRIFF_2: ConfigKey = "Тариф \"Ночь\", цена kW/h"
-CONF_POWER_TARRIFF_3: ConfigKey = "Тариф \"Мультипиковый\", цена kW/h"
-CONF_POWER_TARRIFF_4: ConfigKey = "Тариф \"Зональный\", цена kW/h"
+CONF_DIAGNOSTIC_SENSORS: ConfigKey  = "diagnostic_sensors"
+CONF_POWER_TARRIFF_1: ConfigKey = 'Тариф "День", стоимость kW/h'
+CONF_POWER_TARRIFF_2: ConfigKey = 'Тариф "Ночь", стоимость kW/h'
+CONF_POWER_TARRIFF_3: ConfigKey = 'Тариф "Мультипиковый", стоимость kW/h'
+CONF_POWER_TARRIFF_4: ConfigKey = 'Тариф "Зональный", стоимость kW/h'
 
 CONF_TARIFFS_KEYS: Final = (CONF_POWER_TARRIFF_1,CONF_POWER_TARRIFF_2,CONF_POWER_TARRIFF_3,CONF_POWER_TARRIFF_4)
 
