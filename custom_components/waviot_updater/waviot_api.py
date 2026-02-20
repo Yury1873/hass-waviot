@@ -11,6 +11,7 @@ _LOGGER = logging.getLogger(__name__)
 
 #############################
 class WaviotApi:
+    _api_key: str
     def __init__(self, client: waviot_client.WaviotClient) -> None:
         self.client = client
         self._registrators: Dict[my_types.Registrator_key, Dict] = {}

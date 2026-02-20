@@ -11,10 +11,10 @@ PLATFORMS: Final = ["sensor"]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Set up WAVIoT integration from config entry."""
-    _LOGGER.debug("Setup %s (%s)", entry.title, entry.data[const.CONF_API_KEY])
+    #_LOGGER.debug("Setup %s (%s)", entry.title, entry.data[const.CONF_API_KEY])
     #api_key = entry.data[const.CONF_API_KEY]
     #modem_id = entry.data[const.CONF_MODEM_ID]
-
+    _LOGGER.debug(f"async_setup_entry {entry.options}")
     hass.data.setdefault(const.DOMAIN, {})
     coord = WaviotDataUpdateCoordinator(hass, entry)
     hass.data[const.DOMAIN][entry.entry_id] = coord

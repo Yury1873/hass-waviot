@@ -21,8 +21,7 @@ from homeassistant.const import CONF_NAME
 _LOGGER = logging.getLogger(__name__)
 
 from . import const, waviot_api, waviot_client
-
-
+TARIFFS_CONFIG_SELECTOR = selector.NumberSelectorConfig(min=0.0, max=99.99, step=0.01, mode=selector.NumberSelectorMode.BOX)
 DATA_SCHEMA_API_KEY = vol.Schema({ vol.Required(const.CONF_API_KEY): str,})
 DATA_SCHEMA_OPTIONS = vol.Schema(
             {
@@ -39,9 +38,7 @@ DATA_SCHEMA_OPTIONS = vol.Schema(
     #        ): selector.DurationSelector(
     #            selector.DurationSelectorConfig(enable_day=False),
     #        ),
-            vol.Optional( const.CONF_POWER_TARRIFF_1,): selector.NumberSelector(
-                        selector.NumberSelectorConfig(min=0.0, max=99.99, step=0.01, mode=selector.NumberSelectorMode.BOX)
-                    ),
+            vol.Optional( const.CONF_POWER_TARRIFF_1,): selector.NumberSelector( TARIFFS_CONFIG_SELECTOR),
             vol.Optional( const.CONF_POWER_TARRIFF_2,): selector.NumberSelector(
                         selector.NumberSelectorConfig(min=0.0, max=99.99, step=0.01, mode=selector.NumberSelectorMode.BOX)
                     ),
@@ -88,9 +85,30 @@ class WaviotFlowHandler(config_entries.ConfigFlow, domain= const.DOMAIN):
     async def async_step_user(  self, user_input: dict[str, Any] | None = None ) -> ConfigFlowResult:
         if user_input is not None:
             self._api_key = user_input[const.CONF_API_KEY]
+            #self.context[const.CONF_API_KEY] = user_input[const.CONF_API_KEY]
             title = await self.api.settlement_name
-            return self.async_create_entry(title=title, data=user_input, options = user_input)
+            #return self.async_create_entry(title=title, data=user_input, options = user_input)
+            return await self.async_step_confirm(user_input)
         return self.async_show_form( step_id="user", data_schema=DATA_SCHEMA_API_KEY)
+
+    async def async_step_confirm(self, user_input):
+        # Сохраняем данные из предыдущего шага
+        _LOGGER.debug(f"user_input {user_input}")
+        return await self.async_step_tariffs()
+
+    async def async_step_tariffs(self, user_input=None):
+        if user_input:
+#            self._api_key = user_input[const.CONF_API_KEY]
+            _LOGGER.debug(f"user_input {user_input}")
+            title = await self.api.settlement_name
+
+            return self.async_create_entry(title=title,
+                                           data={const.CONF_API_KEY: self._api_key},
+                                           options = user_input
+                                          )
+            s
+            #return self.async_create_entry(title="My Integration", data={**self.flow_impl.user_input, **user_input})
+        return self.async_show_form( step_id="tariffs", data_schema=DATA_SCHEMA_OPTIONS)
 
     @staticmethod
     @callback
