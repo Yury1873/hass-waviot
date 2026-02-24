@@ -52,6 +52,7 @@ class _WaviotBaseSensor(
         super().__init__(coordinator)
         entry = coordinator.config_entry
         _LOGGER.debug("Initialize %s for %s", self.__class__.__name__, entry.title)
+        #self._attr_available=False
         self._attr_unique_id = unique_id
         self._attr_device_info =  DeviceInfo(
                 configuration_url=waviot_client.WaviotClient.BASE_URL,
@@ -93,7 +94,8 @@ class WaviotRegistratorSensor(_WaviotBaseSensor):
     ):
         super().__init__(
             coordinator = coordinator,
-            unique_id=f"waviot_{registrator_raw['modem_id']}_{self.validate_obis(registrator_raw['obis'])}_{registrator_raw['tariff_descriptor']}",
+            unique_id=
+                (f"waviot_{registrator_raw['modem_id']}_{self.validate_obis(registrator_raw['obis'])}_{registrator_raw['tariff_descriptor']}").lower(),
             name = registrator_raw['locality_name'],
             model = f"modem ID: {registrator_raw['modem_id']}"
         )
@@ -148,13 +150,14 @@ class WaviotBalanceSensor_v2(_WaviotBaseSensor):
                 coordinator: WaviotDataUpdateCoordinator,
                 registrator_data: dict[str, Any],
                 balance_type: my_types.BALANCE_TYPES,
-                uniq_id=None
+                uniq_id: str=None
         ):
             if uniq_id is None:
-                uniq_id=f"waviot_{registrator_data['serial']}_{registrator_data['obis']}_blnс_{balance_type}",
+                uniq_id=f"waviot_{registrator_data['serial']}_{registrator_data['obis']}_balance_{balance_type}"
+
             super().__init__(
                 coordinator=coordinator,
-                unique_id=uniq_id,
+                unique_id=uniq_id.lower(),
                 name=registrator_data['locality_name'],
                 model=f"modem ID: {registrator_data['modem_id']}"
             )
@@ -176,6 +179,9 @@ class WaviotBalanceSensor_v2(_WaviotBaseSensor):
 #            self.balance = self.coordinator.api.get_registrator_balance(self._registrator_key, self._balance_type)
             self._reg_data = self.coordinator.api.get_registrator_raw(self._registrator_key)
             self._reg_data['tariff']=self.get_tariff(self._reg_data['tariff_id'])
+            self._attr_available = False  # или self._attr_state = STATE_UNAVAILABLE
+            #self.async_write_ha_state()
+            _LOGGER.debug(f"self.available= {self.available}")
             self._update_state_attributes()
             self.coordinator.last_update_success = True
             super()._handle_coordinator_update()
@@ -248,11 +254,11 @@ class WaviotBalanceMonetarySensor_v2(_WaviotBaseSensor):
             super().__init__(
                 coordinator=coordinator,
                 # unique_id = f"{const.DOMAIN}_{balance_data['serial']}_{self.validate_obis(balance_data['obis'])}_{balance_type}_balance_money",
-                unique_id=f"waviot_{registrator_data['serial']}_{registrator_data['obis']}_mnt_blnc_{balance_type}",
+                unique_id=(f"waviot_{registrator_data['serial']}_{registrator_data['obis']}_monetary_balance_{balance_type}").lower(),
                 name=registrator_data['locality_name'],
                 model=f"modem ID: {registrator_data['modem_id']}"
             )
-
+            #self._attr_available = False
             self._reg_data: dict[str, Any] = registrator_data
             #self.balance = balance_data
             self._balance_type: my_types.BALANCE_TYPES = balance_type
