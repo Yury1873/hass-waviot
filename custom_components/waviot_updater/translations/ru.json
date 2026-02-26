@@ -1,0 +1,107 @@
+{
+  "title": "WavIoT",
+  "common": {
+    "monthly_balance_kwh": "датчик месячного баланса в kWh",
+    "monthly_monetary_balance": "датчик месячного баланса в kWh"
+  },
+  "config": {
+    "title": "Новое подключение к АСКУЭ WavIoT",
+    "step": {
+      "user": {
+        "title": "Вход в личный кабинет",
+        "data": {
+          "api_key": "API KEY личного кабинета"
+        }
+      },
+      "tariffs": {
+        "title": "Тарифы",
+        "data": {
+        },
+        "sections": {
+            "tariff_options": {
+              "name": "Тарифы",
+              "data": {
+                "power_tariff_1": "Тариф \"День\", стоимость kW/h",
+                "power_tariff_2": "Тариф \"Ночь\", стоимость kW/h",
+                "power_tariff_3": "Тариф \"Мультипиковый\", стоимость kW/h",
+                "power_tariff_4": "Тариф \"Зональный\", стоимость kW/h"
+              }
+            },
+            "daily_balance_options": {
+              "name": "дневной баланс",
+              "data": {
+                "daily_balance_kwh": "датчик дневного баланса, kW/h",
+                "daily_monetary_balance": "датчик дневного баланса, денежное выражение"
+              }
+            },
+            "monthly_balance_options": {
+              "name": "месячный баланс",
+              "description": "опции месячного балланса",
+              "data": {
+                "monthly_balance_kwh": "датчик месячного баланса, kW/h",
+                "monthly_monetary_balance": "датчик месячного баланса, денежное выражение"
+              }
+            },
+            "extra_sensors": {
+              "name": "дополнительные датчики",
+              "data": {
+                "tariff_rate_sensors": "датчики текущих тарифов"
+              }
+            }
+          }
+      }
+    }
+  },
+  "options": {
+      "step": {
+        "init": {
+          "title": "Настройка тарифов и датчиков",
+          "description": "Установите тарифы и параметры сенсоров",
+          "data": {
+
+          },
+          "sections": {
+            "tariff_options": {
+              "name": "Тарифы",
+              "data": {
+                "power_tariff_1": "Тариф \"День\", стоимость kW/h",
+                "power_tariff_2": "Тариф \"Ночь\", стоимость kW/h",
+                "power_tariff_3": "Тариф \"Мультипиковый\", стоимость kW/h",
+                "power_tariff_4": "Тариф \"Зональный\", стоимость kW/h"
+              }
+            },
+            "daily_balance_options": {
+              "name": "дневной баланс",
+              "data": {
+                "daily_balance_kwh": "датчик дневного баланса, kW/h",
+                "daily_monetary_balance": "датчик дневного баланса, денежное выражение"
+              }
+            },
+            "monthly_balance_options": {
+              "name": "месячный баланс",
+              "description": "опции месячного балланса",
+              "data": {
+                "monthly_balance_kwh": "датчик месячного баланса, kW/h",
+                "monthly_monetary_balance": "датчик месячного баланса, денежное выражение"
+              }
+            },
+            "extra_sensors": {
+              "name": "дополнительные датчики",
+              "data": {
+                "tariff_rate_sensors": "датчики текущих тарифов"
+              }
+            }
+          }
+        }
+      }
+    },
+  "selector": {
+      "allow_group": {
+        "options": {
+          "all": "Test 1",
+          "light": "Test 2",
+          "switch": "Test 3"
+        }
+      }
+    }
+}

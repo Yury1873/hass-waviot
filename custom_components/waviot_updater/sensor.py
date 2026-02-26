@@ -28,13 +28,13 @@ async def async_setup_entry(
 
     for key, registrator_raw in coord.api.registrators_raw.items():
         _LOGGER.debug('registrator_raw: %s', registrator_raw)
-        sensors.append( WaviotRegistratorSensor( coord,  registrator_raw))
+        sensors.append( WaviotRegistratorSensor( coord,entry=entry, registrator_data=registrator_raw))
         ## дневные балансы ##
-        sensors.append( WaviotBalanceSensor_v2 ( coord, registrator_raw, balance_type='daily'))
-        sensors.append( WaviotBalanceMonetarySensor_v2 ( coord, registrator_raw, balance_type='daily'))
+        sensors.append( WaviotBalanceSensor ( coord,entry=entry, registrator_data=registrator_raw, balance_type='daily'))
+        sensors.append( WaviotBalanceMonetarySensor ( coord, entry=entry, registrator_data=registrator_raw, balance_type='daily'))
         ## месячные балансы ##
-        sensors.append( WaviotBalanceSensor_v2 ( coord, registrator_raw, balance_type='monthly'))
-        sensors.append( WaviotBalanceMonetarySensor_v2 ( coord, registrator_raw, balance_type='monthly'))
+        sensors.append( WaviotBalanceSensor ( coord, entry=entry, registrator_data=registrator_raw, balance_type='monthly'))
+        sensors.append( WaviotBalanceMonetarySensor ( coord, entry=entry, registrator_data=registrator_raw, balance_type='monthly'))
     async_add_entities( sensors)
 
 ################################
@@ -44,13 +44,15 @@ class _WaviotBaseSensor(
     def __init__(
         self,
         coordinator: WaviotDataUpdateCoordinator,
-#        entry: ConfigEntry,
+        entry: ConfigEntry,
         unique_id: str,
         name: str,
         model: str,
     ):
         super().__init__(coordinator)
-        entry = coordinator.config_entry
+
+        #entry = coordinator.config_entry
+        self.entry = entry
         _LOGGER.debug("Initialize %s for %s", self.__class__.__name__, entry.title)
         #self._attr_available=False
         self._attr_unique_id = unique_id
@@ -89,19 +91,21 @@ class WaviotRegistratorSensor(_WaviotBaseSensor):
     def __init__(
         self,
         coordinator: WaviotDataUpdateCoordinator,
+        entry: ConfigEntry,
         #registrator: waviot_api.Registrator,
-        registrator_raw: Dict[str, Any],
+        registrator_data: Dict[str, Any],
     ):
         super().__init__(
             coordinator = coordinator,
+            entry=entry,
             unique_id=
-                (f"waviot_{registrator_raw['modem_id']}_{self.validate_obis(registrator_raw['obis'])}_{registrator_raw['tariff_descriptor']}").lower(),
-            name = registrator_raw['locality_name'],
-            model = f"modem ID: {registrator_raw['modem_id']}"
+                (f"waviot_{registrator_data['modem_id']}_{self.validate_obis(registrator_data['obis'])}_{registrator_data['tariff_descriptor']}").lower(),
+            name = registrator_data['locality_name'],
+            model = f"modem ID: {registrator_data['modem_id']}"
         )
-        self._registrator_raw = registrator_raw
-        self._registrator_key: my_types.Registrator_key = my_types.Registrator_key(modem_id=registrator_raw['modem_id'],
-                                                                                       channel_id=registrator_raw['channel_id'])
+        self._registrator_raw = registrator_data
+        self._registrator_key: my_types.Registrator_key = my_types.Registrator_key(modem_id=registrator_data['modem_id'],
+                                                                                       channel_id=registrator_data['channel_id'])
         self._update_state_attributes()
 
     @callback
@@ -137,7 +141,7 @@ class WaviotRegistratorSensor(_WaviotBaseSensor):
     #    return f"{self._registrator_raw.last_value}"
 
 ################################
-class WaviotBalanceSensor_v2(_WaviotBaseSensor):
+class WaviotBalanceSensor(_WaviotBaseSensor):
     # _attr_state_class = sensor.SensorStateClass.TOTAL_INCREASING
     _attr_state_class = sensor.SensorStateClass.TOTAL
     _attr_device_class = sensor.SensorDeviceClass.ENERGY
@@ -148,6 +152,7 @@ class WaviotBalanceSensor_v2(_WaviotBaseSensor):
     def __init__(
                 self,
                 coordinator: WaviotDataUpdateCoordinator,
+                entry: ConfigEntry,
                 registrator_data: dict[str, Any],
                 balance_type: my_types.BALANCE_TYPES,
                 uniq_id: str=None
@@ -157,6 +162,7 @@ class WaviotBalanceSensor_v2(_WaviotBaseSensor):
 
             super().__init__(
                 coordinator=coordinator,
+                entry=entry,
                 unique_id=uniq_id.lower(),
                 name=registrator_data['locality_name'],
                 model=f"modem ID: {registrator_data['modem_id']}"
@@ -237,7 +243,7 @@ class WaviotBalanceSensor_v2(_WaviotBaseSensor):
         #    return f"{self.balance.last_value}"
 
 ################################
-class WaviotBalanceMonetarySensor_v2(_WaviotBaseSensor):
+class WaviotBalanceMonetarySensor(_WaviotBaseSensor):
     # _attr_state_class = sensor.SensorStateClass.TOTAL_INCREASING
     _attr_state_class = sensor.SensorStateClass.TOTAL
     _attr_device_class = sensor.SensorDeviceClass.MONETARY
@@ -248,17 +254,21 @@ class WaviotBalanceMonetarySensor_v2(_WaviotBaseSensor):
     def __init__(
                 self,
                 coordinator: WaviotDataUpdateCoordinator,
+                entry: ConfigEntry,
                 registrator_data: dict[str, Any],
                 balance_type: my_types.BALANCE_TYPES,
         ):
+            self._attr_entity_registry_enabled_default = False
             super().__init__(
                 coordinator=coordinator,
+                entry=entry,
                 # unique_id = f"{const.DOMAIN}_{balance_data['serial']}_{self.validate_obis(balance_data['obis'])}_{balance_type}_balance_money",
                 unique_id=(f"waviot_{registrator_data['serial']}_{registrator_data['obis']}_monetary_balance_{balance_type}").lower(),
                 name=registrator_data['locality_name'],
                 model=f"modem ID: {registrator_data['modem_id']}"
             )
             #self._attr_available = False
+            #self._attr_entity_registry_enabled_default=False
             self._reg_data: dict[str, Any] = registrator_data
             #self.balance = balance_data
             self._balance_type: my_types.BALANCE_TYPES = balance_type

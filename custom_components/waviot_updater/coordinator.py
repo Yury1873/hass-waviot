@@ -14,15 +14,17 @@ class WaviotDataUpdateCoordinator(DataUpdateCoordinator):
     """Coordinator to fetch WAVIoT modem and energy data safely."""
 
     def __init__(self, hass: HomeAssistant, entry: ConfigEntry):
-        self.hass = hass
-        self.api_key = entry.data[const.CONF_API_KEY]
+        #self.hass = hass
         super().__init__(
             hass,
             _LOGGER,
+            config_entry=entry,
             name=f"WAVIoT",
             update_interval= const.DEFAULT_UPDATE_INTERVAL,
         )
-
+        self.api_key = {}
+        if const.CONF_API_KEY in entry.data:
+            self.api_key = entry.data[const.CONF_API_KEY]
         self.api = waviot_api.WaviotApi(
             waviot_client.WaviotClient(
                 async_get_clientsession(hass), self.api_key
