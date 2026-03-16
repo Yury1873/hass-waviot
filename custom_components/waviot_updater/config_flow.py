@@ -24,58 +24,46 @@ from . import const, waviot_api, waviot_client
 DATA_SCHEMA_API_KEY = vol.Schema({ vol.Required(const.CONF_API_KEY): str,})
 
 TARIFFS_CONFIG_SELECTOR = selector.NumberSelectorConfig(min=0.0, max=99.99, step=0.01, mode=selector.NumberSelectorMode.BOX)
-DATA_SCHEMA_OPTIONS = vol.Schema( {
-            vol.Required("tariff_options"): section(
-                vol.Schema({
-                    vol.Optional( const.CONF_POWER_TARIFF_1,): selector.NumberSelector( TARIFFS_CONFIG_SELECTOR),
-                    vol.Optional( const.CONF_POWER_TARIFF_2,): selector.NumberSelector( TARIFFS_CONFIG_SELECTOR),
-                    vol.Optional( const.CONF_POWER_TARIFF_3,): selector.NumberSelector( TARIFFS_CONFIG_SELECTOR),
-                    vol.Optional( const.CONF_POWER_TARIFF_4,): selector.NumberSelector( TARIFFS_CONFIG_SELECTOR),
-                }),
-                SectionConfig(collapsed=True),
-            ),
-            vol.Required("daily_balance_options"): section(
-                vol.Schema({
-                    vol.Required("daily_balance_kwh", default=True): bool,
-                    vol.Required("daily_monetary_balance", default=True): bool,
-                }),
-                SectionConfig(collapsed=True),
-            ),
-            vol.Required("monthly_balance_options"): section(
-                vol.Schema({
-                    vol.Required("monthly_balance_kwh", default=True): bool,
-                    vol.Required("monthly_monetary_balance", default=True): bool,
-                }),
-                SectionConfig(collapsed=True),
-            ),
-            vol.Required("extra_sensors"): section(
-                vol.Schema({
-                    vol.Required("tariff_rate_sensors", default=True): bool,
-                   # vol.Required("monthly_monetary_balance", default=True): bool,
-            }),
-            SectionConfig(collapsed=True),
-            ),
+DATA_SCHEMA_SENSORS_OPTIONS = vol.Schema( {
+    vol.Required("daily_balance_options",default=["daily_balance_kwh", "daily_monetary_balance"]):
+        selector.SelectSelector(
+            selector.SelectSelectorConfig(  options= ["daily_balance_kwh", "daily_monetary_balance"],
+                                        translation_key= "daily_balance_options", multiple=True)
+        ),
+    vol.Required("monthly_balance_options", default=["monthly_balance_kwh", "monthly_monetary_balance"]):
+        selector.SelectSelector(
+            selector.SelectSelectorConfig(options=["monthly_balance_kwh", "monthly_monetary_balance"],
+                                          translation_key="monthly_balance_options", multiple=True)
+        ),
+    vol.Required("tariff_rate_sensors", default=True): bool,
+})
 
-            #vol.Required("extra_sensors"): selector.SelectSelector(
-            #    selector.SelectSelectorConfig( options= ["all", "light", "switch"],
-            #                          translation_key= "allow_group"
-            #                          )
-            #)
-        })
+DATA_SCHEMA_TARIFFS_OPTIONS = vol.Schema({
+   # vol.Required("tariff_options"): section(
+    #    vol.Schema({
+            vol.Optional( const.CONF_POWER_TARIFF_1,default=0): selector.NumberSelector( TARIFFS_CONFIG_SELECTOR),
+            vol.Optional( const.CONF_POWER_TARIFF_2,default=0): selector.NumberSelector( TARIFFS_CONFIG_SELECTOR),
+            vol.Optional( const.CONF_POWER_TARIFF_3,default=0): selector.NumberSelector( TARIFFS_CONFIG_SELECTOR),
+            vol.Optional( const.CONF_POWER_TARIFF_4,default=0): selector.NumberSelector( TARIFFS_CONFIG_SELECTOR),
+     #   }),
+    #    SectionConfig(collapsed=True),
+   # ),
+   })
 
 
-CONFIG_FLOW = {
-    "api_key": SchemaFlowFormStep(
-        schema=DATA_SCHEMA_API_KEY,
-        next_step="options",
-        #next_step=None,
-        #validate_user_input=validate_connection,
-    ),
-     "options": SchemaFlowFormStep(
-        schema=DATA_SCHEMA_OPTIONS,
-        next_step=None,
-    ),
-}
+
+#CONFIG_FLOW = {
+#    "api_key": SchemaFlowFormStep(
+#        schema=DATA_SCHEMA_API_KEY,
+#        next_step="options",
+#        #next_step=None,
+#        #validate_user_input=validate_connection,
+#    ),
+#     "options": SchemaFlowFormStep(
+#        schema=DATA_SCHEMA_OPTIONS,
+#        next_step=None,
+#    ),
+#}
 
 class WaviotFlowHandler(config_entries.ConfigFlow, domain= const.DOMAIN):
     VERSION = 1
@@ -96,23 +84,33 @@ class WaviotFlowHandler(config_entries.ConfigFlow, domain= const.DOMAIN):
         if user_input is not None:
             self._api_key = user_input[const.CONF_API_KEY]
             title = await self.api.settlement_name
-            return await self.async_step_confirm(user_input)
+            return await self.async_step_confirm_api_key(user_input)
         return self.async_show_form( step_id="user", data_schema=DATA_SCHEMA_API_KEY)
 
-    async def async_step_confirm(self, user_input):
 
+    async def async_step_confirm_api_key(self, user_input):
         _LOGGER.debug(f"user_input {user_input}")
-        return await self.async_step_tariffs()
+        #тут надо бы организовать проверку api_key
+        return await self.async_step_select_sensors()
+
+    async def async_step_select_sensors(self, user_input=None):
+        if user_input:
+            self.context.update(user_input)
+            _LOGGER.debug(f"user_input {user_input}")
+            return await self.async_step_tariffs()
+        return self.async_show_form( step_id="select_sensors", data_schema=DATA_SCHEMA_SENSORS_OPTIONS)
+
 
     async def async_step_tariffs(self, user_input=None):
         if user_input:
-            title = await self.api.settlement_name
+            self.context.update(user_input)
             _LOGGER.debug(f"user_input {user_input}")
+            title = await self.api.settlement_name
             return self.async_create_entry(title=title,
                                            data={const.CONF_API_KEY: self._api_key},
-                                           options = user_input
+                                           options = self.context
                                           )
-        return self.async_show_form( step_id="tariffs", data_schema=DATA_SCHEMA_OPTIONS)
+        return self.async_show_form( step_id="tariffs", data_schema=DATA_SCHEMA_TARIFFS_OPTIONS)
 
     @staticmethod
     @callback
@@ -142,13 +140,11 @@ class WaviotOptionsFlowHandler(config_entries.OptionsFlowWithReload):
         if user_input is not None:
             return self.async_create_entry(data=user_input)
 
+        schema = DATA_SCHEMA_TARIFFS_OPTIONS
         if self.entry.options is not None and len(self.entry.options) > 0:
-            schema = self.add_suggested_values_to_schema( DATA_SCHEMA_OPTIONS, self.entry.options )
-        else:
-            schema = DATA_SCHEMA_OPTIONS
+            schema = self.add_suggested_values_to_schema( DATA_SCHEMA_TARIFFS_OPTIONS, self.entry.options )
 
         #self.show_advanced_options=True
-
         #if self.show_advanced_options or True:
         #    schema[vol.Optional("allow_groups")] = selector.SelectSelectorConfig (
         #                            options= ["all", "light", "switch"],

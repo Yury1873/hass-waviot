@@ -22,7 +22,7 @@ async def async_setup_entry(
             hass: HomeAssistant, entry: ConfigEntry,
             async_add_entities: Callable
 ):
-    _LOGGER.debug("Setup %s ", entry.title)
+    _LOGGER.debug("Setup %s ", entry)
     coord: WaviotDataUpdateCoordinator = hass.data[const.DOMAIN][entry.entry_id]
     sensors = []
 
@@ -52,6 +52,7 @@ class _WaviotBaseSensor(
         super().__init__(coordinator)
 
         #entry = coordinator.config_entry
+
         self.entry = entry
         _LOGGER.debug("Initialize %s for %s", self.__class__.__name__, entry.title)
         #self._attr_available=False
@@ -105,8 +106,30 @@ class WaviotRegistratorSensor(_WaviotBaseSensor):
         )
         self._registrator_raw = registrator_data
         self._registrator_key: my_types.Registrator_key = my_types.Registrator_key(modem_id=registrator_data['modem_id'],
-                                                                                       channel_id=registrator_data['channel_id'])
+                                                                       channel_id=registrator_data['channel_id'])
+
+        # self.entry = {self.entry}
+        _LOGGER.debug(f"self.entry = {self.entry}")
+        _LOGGER.debug(f"self.registry_entry = {self.registry_entry}")
         self._update_state_attributes()
+
+    #def entity_registry_enabled_default(self) -> bool:
+
+
+    @property
+    def enabled(self) -> bool:
+        """Возвращает False, чтобы отключить новые сущности."""
+        ##registry = er.async_get(hass)
+        ##if entity_id in registry.entities:
+        ##    registry.async_update_entity(entity_id, disabled_by=er.RegistryEntryDisabler.INTEGRATION)
+        _LOGGER.debug(f"self.registry_entry {self.registry_entry}")
+        _LOGGER.debug(f"self.entry.options {self.entry.options['daily_balance_options']}")
+        _LOGGER.debug(f"self.ent {self.coordinator.config_entry.options['daily_balance_options']}")
+        _LOGGER.debug(f" {"daily_balance_kwh" in self.coordinator.config_entry.options['daily_balance_options']}")
+        #self.coordinator.config_entry.options[tariff_key]
+        if "daily_balance_kwh" in self.entry.options['daily_balance_options']:
+            ...
+        return "daily_balance_kwh" in self.coordinator.config_entry.options['daily_balance_options']
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -171,6 +194,7 @@ class WaviotBalanceSensor(_WaviotBaseSensor):
             #self.last_reset = None
             self._reg_data: dict[str, Any] = registrator_data
             self._balance_type: my_types.BALANCE_TYPES = balance_type
+            self._attr_entity_registry_enabled_default = self._set_entity_registry_enabled_flag()
             self._registrator_key: my_types.Registrator_key = my_types.Registrator_key(
                 modem_id = self._reg_data['modem_id'],
                 channel_id = self._reg_data['channel_id']
@@ -178,6 +202,14 @@ class WaviotBalanceSensor(_WaviotBaseSensor):
             self._balance_dict_key = f"balance_{balance_type}"
             self._reg_data['tariff'] = self.get_tariff(self._reg_data['tariff_id'])
             self._update_state_attributes()
+
+    def _set_entity_registry_enabled_flag(self) -> bool:
+        match self._balance_type:
+            case "daily":
+                return "daily_balance_kwh" in self.coordinator.config_entry.options['daily_balance_options']
+            case "monthly":
+                return "monthly_balance_kwh" in self.coordinator.config_entry.options['monthly_balance_options']
+        return True
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -258,20 +290,19 @@ class WaviotBalanceMonetarySensor(_WaviotBaseSensor):
                 registrator_data: dict[str, Any],
                 balance_type: my_types.BALANCE_TYPES,
         ):
-            self._attr_entity_registry_enabled_default = False
             super().__init__(
                 coordinator=coordinator,
                 entry=entry,
-                # unique_id = f"{const.DOMAIN}_{balance_data['serial']}_{self.validate_obis(balance_data['obis'])}_{balance_type}_balance_money",
                 unique_id=(f"waviot_{registrator_data['serial']}_{registrator_data['obis']}_monetary_balance_{balance_type}").lower(),
                 name=registrator_data['locality_name'],
                 model=f"modem ID: {registrator_data['modem_id']}"
             )
             #self._attr_available = False
-            #self._attr_entity_registry_enabled_default=False
+
             self._reg_data: dict[str, Any] = registrator_data
             #self.balance = balance_data
             self._balance_type: my_types.BALANCE_TYPES = balance_type
+            self._attr_entity_registry_enabled_default = self._set_entity_registry_enabled_flag()
             self._registrator_key: my_types.Registrator_key = my_types.Registrator_key(
                 modem_id=self._reg_data['modem_id'],
                 channel_id=self._reg_data['channel_id']
@@ -279,6 +310,16 @@ class WaviotBalanceMonetarySensor(_WaviotBaseSensor):
             self._balance_dict_key =f"balance_{balance_type}"
             self._reg_data['tariff']=self.get_tariff(self._reg_data['tariff_id'])
             self._update_state_attributes()
+    def _set_entity_registry_enabled_flag(self) -> bool:
+        _LOGGER.debug(f" options={self.coordinator.config_entry.options}")
+        fl=True
+        match self._balance_type:
+            case "daily":
+                fl= "daily_monetary_balance" in self.coordinator.config_entry.options['daily_balance_options']
+            case "monthly":
+                fl=  "monthly_monetary_balance" in self.coordinator.config_entry.options['monthly_balance_options']
+        _LOGGER.debug(f"set_entity_registry_enabled_flag: {fl}")
+        return fl
 
     @callback
     def _handle_coordinator_update(self) -> None:

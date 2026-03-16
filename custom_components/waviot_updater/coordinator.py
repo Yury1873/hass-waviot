@@ -22,6 +22,7 @@ class WaviotDataUpdateCoordinator(DataUpdateCoordinator):
             name=f"WAVIoT",
             update_interval= const.DEFAULT_UPDATE_INTERVAL,
         )
+        _LOGGER.debug(f"get init coord hass={hass}")
         self.api_key = {}
         if const.CONF_API_KEY in entry.data:
             self.api_key = entry.data[const.CONF_API_KEY]

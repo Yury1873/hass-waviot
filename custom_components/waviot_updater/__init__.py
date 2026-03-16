@@ -30,7 +30,18 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Unload a config entry."""
     _LOGGER.debug("Unload %s (%s)", entry.title, entry.data[const.CONF_API_KEY])
+    _LOGGER.debug(f"async_remove_entry {entry.entry_id}")
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
+        #if runtime_data := entry.runtime_data:
+        #    _LOGGER.debug(f'get runtime_data.async_reset')
+        #    runtime_data.async_reset()  # Остановка таймеров, unsubscribe
         hass.data[const.DOMAIN].pop(entry.entry_id)
     return unload_ok
+
+#async def async_remove_entry(hass: HomeAssistant, entry: ConfigEntry):
+#    """Handle removal of an entry from UI."""
+#    # Дополнительная очистка при полном remove (опционально)
+#    _LOGGER.debug(f"async_remove_entry {entry.entry_id}")
+#    await hass.config_entries.async_remove(entry.entry_id)
+#    return True
