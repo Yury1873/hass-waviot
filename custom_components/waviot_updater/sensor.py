@@ -116,20 +116,40 @@ class WaviotRegistratorSensor(_WaviotBaseSensor):
     #def entity_registry_enabled_default(self) -> bool:
 
 
-    @property
-    def enabled(self) -> bool:
-        """Возвращает False, чтобы отключить новые сущности."""
+    #@property
+    #def enabled(self) -> bool:
+    #    """Возвращает False, чтобы отключить новые сущности."""
         ##registry = er.async_get(hass)
         ##if entity_id in registry.entities:
         ##    registry.async_update_entity(entity_id, disabled_by=er.RegistryEntryDisabler.INTEGRATION)
-        _LOGGER.debug(f"self.registry_entry {self.registry_entry}")
-        _LOGGER.debug(f"self.entry.options {self.entry.options['daily_balance_options']}")
-        _LOGGER.debug(f"self.ent {self.coordinator.config_entry.options['daily_balance_options']}")
-        _LOGGER.debug(f" {"daily_balance_kwh" in self.coordinator.config_entry.options['daily_balance_options']}")
-        #self.coordinator.config_entry.options[tariff_key]
-        if "daily_balance_kwh" in self.entry.options['daily_balance_options']:
-            ...
-        return "daily_balance_kwh" in self.coordinator.config_entry.options['daily_balance_options']
+    #    _LOGGER.debug(f"self.registry_entry {self.registry_entry}")
+    #    _LOGGER.debug(f"self.entry.options {self.entry.options['daily_balance_options']}")
+    #    _LOGGER.debug(f"self.ent {self.coordinator.config_entry.options['daily_balance_options']}")
+    #    _LOGGER.debug(f" {"daily_balance_kwh" in self.coordinator.config_entry.options['daily_balance_options']}")
+    #    #self.coordinator.config_entry.options[tariff_key]
+    #    if "daily_balance_kwh" in self.entry.options['daily_balance_options']:
+    #        ...
+    #    return "daily_balance_kwh" in self.coordinator.config_entry.options['daily_balance_options']
+
+        @property
+        def enabled(self) -> bool:
+            """Определяет, должна ли сущность быть включена по умолчанию."""
+            # Используем .get() с пустым списком по умолчанию, чтобы избежать KeyError
+            opts = self.coordinator.config_entry.options
+            daily_opts = opts.get('daily_balance_options', [])
+            
+            _LOGGER.debug(
+                f"Checking enabled state for {self.entity_id}: "
+                f"registry_entry={self.registry_entry}, "
+                f"daily_opts={daily_opts}"
+            )
+            
+            # Если настройки пустые (первый запуск до сохранения опций) - включаем по умолчанию
+            if not daily_opts:
+                return True
+                
+            return "daily_balance_kwh" in daily_opts
+
 
     @callback
     def _handle_coordinator_update(self) -> None:
@@ -204,11 +224,14 @@ class WaviotBalanceSensor(_WaviotBaseSensor):
             self._update_state_attributes()
 
     def _set_entity_registry_enabled_flag(self) -> bool:
+        opts = self.coordinator.config_entry.options
         match self._balance_type:
             case "daily":
-                return "daily_balance_kwh" in self.coordinator.config_entry.options['daily_balance_options']
+                #return "daily_balance_kwh" in self.coordinator.config_entry.options['daily_balance_options']
+                return "daily_balance_kwh" in opts.get('daily_balance_options', [])
             case "monthly":
-                return "monthly_balance_kwh" in self.coordinator.config_entry.options['monthly_balance_options']
+                #return "monthly_balance_kwh" in self.coordinator.config_entry.options['monthly_balance_options']
+                return "monthly_balance_kwh" in opts.get('monthly_balance_options', [])
         return True
 
     @callback
@@ -247,7 +270,7 @@ class WaviotBalanceSensor(_WaviotBaseSensor):
             self._attr_extra_state_attributes = balance_attr
 
     def get_tariff(self, indx: int) -> float:
-            if (indx < 1) and (indx > 5):
+            if (indx < 1) or (indx > 5):
                 return 0.0
             tariff_key=const.CONF_TARIFFS_KEYS[indx-1]
             _LOGGER.debug(f"tariff_key: {tariff_key}")
@@ -257,11 +280,21 @@ class WaviotBalanceSensor(_WaviotBaseSensor):
             else:
                 return 0.0
 
+    #@property
+    #def native_value(self) -> float:
+    #        """Return the value of the sensor."""
+    #        ret_val = self._reg_data[self._balance_dict_key]['diff']
+    #        return ret_val
+    #@property
+    #def native_value(self) -> float:
+    #    if self._balance_dict_key in self._reg_data and 'diff' in self._reg_data[self._balance_dict_key]:
+    #        return self._reg_data[self._balance_dict_key]['diff']
+    #    return 0.0 # или None, если значения нет
     @property
     def native_value(self) -> float:
-            """Return the value of the sensor."""
-            ret_val = self._reg_data[self._balance_dict_key]['diff']
-            return ret_val
+        # Безопасное получение значения
+        balance_data = self._reg_data.get(self._balance_dict_key, {})
+        return balance_data.get('diff', 0.0)
 
     @property
     def assumed_state(self) -> bool:
@@ -310,17 +343,30 @@ class WaviotBalanceMonetarySensor(_WaviotBaseSensor):
             self._balance_dict_key =f"balance_{balance_type}"
             self._reg_data['tariff']=self.get_tariff(self._reg_data['tariff_id'])
             self._update_state_attributes()
+            
+    #def _set_entity_registry_enabled_flag(self) -> bool:
+    #    _LOGGER.debug(f" options={self.coordinator.config_entry.options}")
+    #    fl=True
+    #    match self._balance_type:
+    #        case "daily":
+    #            fl= "daily_monetary_balance" in self.coordinator.config_entry.options['daily_balance_options']
+    #        case "monthly":
+    #            fl=  "monthly_monetary_balance" in self.coordinator.config_entry.options['monthly_balance_options']
+    #    _LOGGER.debug(f"set_entity_registry_enabled_flag: {fl}")
+    #    return fl
     def _set_entity_registry_enabled_flag(self) -> bool:
-        _LOGGER.debug(f" options={self.coordinator.config_entry.options}")
-        fl=True
+        # Получаем options безопасно
+        opts = self.coordinator.config_entry.options
+        fl = True
         match self._balance_type:
             case "daily":
-                fl= "daily_monetary_balance" in self.coordinator.config_entry.options['daily_balance_options']
+                # Используем .get() с пустым списком по умолчанию
+                fl = "daily_monetary_balance" in opts.get('daily_balance_options', [])
             case "monthly":
-                fl=  "monthly_monetary_balance" in self.coordinator.config_entry.options['monthly_balance_options']
+                fl = "monthly_monetary_balance" in opts.get('monthly_balance_options', [])
         _LOGGER.debug(f"set_entity_registry_enabled_flag: {fl}")
         return fl
-
+        
     @callback
     def _handle_coordinator_update(self) -> None:
             """Handle data update."""
@@ -349,17 +395,31 @@ class WaviotBalanceMonetarySensor(_WaviotBaseSensor):
                     balance_attr[key] = val
             self._attr_extra_state_attributes = balance_attr
 
+    #def get_tariff(self, indx: int) -> float:
+    #        if (indx < 1) and (indx > 5):
+    #            return 0.0
+    #        tariff_key=const.CONF_TARIFFS_KEYS[indx-1]
+    #        _LOGGER.debug(f"tariff_key: {tariff_key}")
+    #        if tariff_key in self.coordinator.config_entry.options:
+    #            _LOGGER.debug(f"tariff_key=: {self.coordinator.config_entry.options[tariff_key]}")
+    #            return self.coordinator.config_entry.options[tariff_key]
+    #        else:
+    #           return 0.0
     def get_tariff(self, indx: int) -> float:
-            if (indx < 1) and (indx > 5):
-                return 0.0
-            tariff_key=const.CONF_TARIFFS_KEYS[indx-1]
-            _LOGGER.debug(f"tariff_key: {tariff_key}")
-            if tariff_key in self.coordinator.config_entry.options:
-                _LOGGER.debug(f"tariff_key=: {self.coordinator.config_entry.options[tariff_key]}")
-                return self.coordinator.config_entry.options[tariff_key]
-            else:
-                return 0.0
-
+        # ИСПРАВЛЕНО: было (indx < 1) and (indx > 5) - это всегда False
+        if indx < 1 or indx > 5:
+            return 0.0
+            
+        tariff_key = const.CONF_TARIFFS_KEYS[indx-1]
+        _LOGGER.debug(f"tariff_key: {tariff_key}")
+        
+        opts = self.coordinator.config_entry.options
+        if tariff_key in opts:
+            _LOGGER.debug(f"tariff_key=: {opts[tariff_key]}")
+            return opts[tariff_key]
+        else:
+            return 0.0
+            
     @property
     def native_value(self) -> float:
             """Return the value of the sensor."""
