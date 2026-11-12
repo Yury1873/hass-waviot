@@ -6,6 +6,6 @@
   "documentation": "https://github.com/Yury1873/hass-waviot",
   "iot_class": "cloud_polling",
   "issue_tracker": "https://github.com/Yury1873/hass-waviot/issues",
-  "requirements": ["aiohttp"],
+  "requirements": [],
   "version": "2026.11.1b2"
 }
