@@ -10,7 +10,7 @@ jobs:
     name: Release ZIP
     runs-on: ubuntu-latest
     steps:
-      - uses: "actions/checkout@v4"
+      - uses: "actions/checkout@v5"
       - name: ZIP Component folder
         run: |
           cd ${{ github.workspace }}/custom_components/waviot_updater/
